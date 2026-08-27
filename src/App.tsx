@@ -18,8 +18,10 @@ const SHOW_IMPORT_EXPORT = false
 
 export default function App() {
   const visitedArr = useStore((s) => s.visited)
+  const wishArr = useStore((s) => s.wishlist)
   const colors = useStore((s) => s.colors)
   const toggleCountry = useStore((s) => s.toggleCountry)
+  const toggleWishCountry = useStore((s) => s.toggleWishCountry)
   const setSelectedCountry = useStore((s) => s.setSelectedCountry)
   const selectedCountry = useStore((s) => s.selectedCountry)
   const clearAll = useStore((s) => s.clearAll)
@@ -40,6 +42,7 @@ export default function App() {
   }, [theme])
 
   const visited = useMemo(() => new Set(visitedArr), [visitedArr])
+  const wishlist = useMemo(() => new Set(wishArr), [wishArr])
   const world = useMemo(() => worldStat(visited), [visited])
   const continents = useMemo(() => continentStats(visited), [visited])
 
@@ -47,7 +50,7 @@ export default function App() {
   const visitedContinents = continents.filter((c) => c.visited > 0).length
 
   function exportJson() {
-    const data = JSON.stringify({ visited: visitedArr, colors }, null, 2)
+    const data = JSON.stringify({ visited: visitedArr, wishlist: wishArr, colors }, null, 2)
     const blob = new Blob([data], { type: 'application/json' })
     const a = document.createElement('a')
     a.href = URL.createObjectURL(blob)
@@ -64,7 +67,11 @@ export default function App() {
       try {
         const data = JSON.parse(String(reader.result))
         if (Array.isArray(data.visited)) {
-          importData({ visited: data.visited, colors: data.colors ?? colors })
+          importData({
+            visited: data.visited,
+            wishlist: Array.isArray(data.wishlist) ? data.wishlist : undefined,
+            colors: data.colors ?? colors,
+          })
         }
       } catch {
         /* invalid file */
@@ -116,12 +123,14 @@ export default function App() {
           </div>
           <WorldMap
             visited={visited}
+            wishlist={wishlist}
             colors={colors}
             onToggle={toggleCountry}
             onOpenCountry={setSelectedCountry}
           />
           <div className="flex items-center gap-4 border-t border-slate-100 px-5 py-2.5 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
             <Legend color={colors.visited} label={t('visited')} />
+            <Legend color={colors.wish} label={t('wishlist')} />
             <Legend color={colors.notVisited} label={t('notVisited')} />
             <Legend color={colors.hover} label={t('hover')} />
             <Legend color={colors.border} label={t('border')} />
@@ -139,8 +148,10 @@ export default function App() {
           <h2 className="mb-4 text-xl font-bold">{t('countries')}</h2>
           <CountryList
             visited={visited}
+            wishlist={wishlist}
             colors={colors}
             onToggle={toggleCountry}
+            onToggleWish={toggleWishCountry}
             onOpen={setSelectedCountry}
           />
         </section>

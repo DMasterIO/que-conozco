@@ -19,11 +19,12 @@ interface Dot {
 interface Props {
   cca2: string
   visited: Set<string>
+  wishlist: Set<string>
   colors: MapColors
   onToggleCity: (id: number) => void
 }
 
-export default function CountryZoomMap({ cca2, visited, colors, onToggleCity }: Props) {
+export default function CountryZoomMap({ cca2, visited, wishlist, colors, onToggleCity }: Props) {
   const { t } = useI18n()
   const [hovered, setHovered] = useState<Dot | null>(null)
 
@@ -66,14 +67,15 @@ export default function CountryZoomMap({ cca2, visited, colors, onToggleCity }: 
       <path d={countryPath} fill={colors.notVisited} stroke={colors.border} strokeWidth={1.5} />
       {dots.map((dot) => {
         const isVisited = visited.has(String(dot.id))
+        const isWished = wishlist.has(String(dot.id))
         return (
           <circle
             key={dot.id}
             cx={dot.x}
             cy={dot.y}
-            r={isVisited ? 4.5 : 3.5}
-            fill={isVisited ? colors.visited : '#ffffff'}
-            stroke={isVisited ? '#ffffff' : colors.visited}
+            r={isVisited || isWished ? 4.5 : 3.5}
+            fill={isVisited ? colors.visited : isWished ? colors.wish : '#ffffff'}
+            stroke={isVisited || isWished ? '#ffffff' : colors.visited}
             strokeWidth={1.5}
             className="cursor-pointer transition-all hover:opacity-80"
             onClick={() => onToggleCity(dot.id)}

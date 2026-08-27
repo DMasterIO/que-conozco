@@ -1,17 +1,20 @@
 import { useMemo } from 'react'
 import Modal from './Modal'
 import { useStore } from '../store'
-import { continentStats, fmtPct, mostVisitedCountry, worldStat } from '../lib/stats'
+import { continentStats, fmtPct, mostVisitedCountry, wishlistStats, worldStat } from '../lib/stats'
 import { useI18n } from '../lib/i18n-context'
 import { countryName, continentLabel } from '../lib/translations'
 
 export default function StatsPanel({ onClose }: { onClose: () => void }) {
   const { t, lang } = useI18n()
   const visitedArr = useStore((s) => s.visited)
+  const wishArr = useStore((s) => s.wishlist)
   const visited = useMemo(() => new Set(visitedArr), [visitedArr])
+  const wishlist = useMemo(() => new Set(wishArr), [wishArr])
   const world = useMemo(() => worldStat(visited), [visited])
   const continents = useMemo(() => continentStats(visited), [visited])
   const mostVisited = useMemo(() => mostVisitedCountry(visited), [visited])
+  const wishes = useMemo(() => wishlistStats(wishlist), [wishlist])
 
   return (
     <Modal title={t('stats')} onClose={onClose} maxWidth="max-w-2xl">
@@ -28,6 +31,8 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
                 : '—'
             }
           />
+          <Card label={t('wishCountries')} value={`${wishes.countries}`} />
+          <Card label={t('wishCities')} value={`${wishes.cities}`} />
         </div>
 
         {mostVisited && (

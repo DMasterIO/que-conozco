@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { geoNaturalEarth1, geoPath } from 'd3-geo'
 import { worldFeatures } from '../lib/geo'
 import { byCca2, byCcn3 } from '../lib/countries'
-import { countryStat, fmtPct } from '../lib/stats'
+import { countryStat, countryWishCount, fmtPct } from '../lib/stats'
 import type { MapColors } from '../types'
 import { useI18n } from '../lib/i18n-context'
 import { countryName } from '../lib/translations'
@@ -14,6 +14,7 @@ const clampZoom = (k: number) => Math.min(12, Math.max(1, k))
 
 interface Props {
   visited: Set<string>
+  wishlist: Set<string>
   colors: MapColors
   onToggle: (cca2: string) => void
   onOpenCountry: (cca2: string) => void
@@ -31,7 +32,7 @@ interface TooltipState {
   y: number
 }
 
-export default function WorldMap({ visited, colors, onToggle, onOpenCountry }: Props) {
+export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCountry }: Props) {
   const { t } = useI18n()
   const svgRef = useRef<SVGSVGElement>(null)
   const drag = useRef<{
@@ -156,13 +157,16 @@ export default function WorldMap({ visited, colors, onToggle, onOpenCountry }: P
           {paths.map(({ d, cca2 }) => {
             const meta = byCca2.get(cca2)
             const stat = meta ? countryStat(meta, visited) : null
+            const wishCount = meta ? countryWishCount(meta, wishlist) : 0
             const isHover = tooltip?.cca2 === cca2
             const fill =
               isHover
                 ? colors.hover
                 : stat && stat.status !== 'none'
                   ? colors.visited
-                  : colors.notVisited
+                  : wishCount > 0
+                    ? colors.wish
+                    : colors.notVisited
             return (
               <path
                 key={cca2}
@@ -209,6 +213,7 @@ export default function WorldMap({ visited, colors, onToggle, onOpenCountry }: P
           x={tooltip.x}
           y={tooltip.y}
           visited={visited}
+          wishlist={wishlist}
           colors={colors}
         />
       )}
@@ -221,18 +226,21 @@ function Tooltip({
   x,
   y,
   visited,
+  wishlist,
   colors,
 }: {
   cca2: string
   x: number
   y: number
   visited: Set<string>
+  wishlist: Set<string>
   colors: MapColors
 }) {
   const { t, lang } = useI18n()
   const meta = byCca2.get(cca2)
   if (!meta) return null
   const stat = countryStat(meta, visited)
+  const wishCount = countryWishCount(meta, wishlist)
   return (
     <div
       className="pointer-events-none fixed z-50 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-xs text-white shadow-lg"
@@ -248,6 +256,12 @@ function Tooltip({
         />
         {stat.visited}/{stat.total} · {fmtPct(stat.pct)}
       </div>
+      {wishCount > 0 && (
+        <div className="mt-0.5 flex items-center gap-2 text-slate-300">
+          <span className="inline-block h-2.5 w-2.5 rounded-sm" style={{ background: colors.wish }} />
+          {wishCount} {t('wishCities')}
+        </div>
+      )}
       <div className="mt-1 text-[10px] text-slate-400">{t('doubleClickHint')}</div>
     </div>
   )

@@ -1,18 +1,20 @@
 import { useMemo, useState } from 'react'
 import { CONTINENT_ORDER, COUNTRIES } from '../lib/countries'
-import { countryStat, fmtPct } from '../lib/stats'
+import { countryStat, countryWishCount, fmtPct } from '../lib/stats'
 import type { MapColors } from '../types'
 import { useI18n } from '../lib/i18n-context'
 import { countryName, continentLabel } from '../lib/translations'
 
 interface Props {
   visited: Set<string>
+  wishlist: Set<string>
   colors: MapColors
   onToggle: (cca2: string) => void
+  onToggleWish: (cca2: string) => void
   onOpen: (cca2: string) => void
 }
 
-export default function CountryList({ visited, colors, onToggle, onOpen }: Props) {
+export default function CountryList({ visited, wishlist, colors, onToggle, onToggleWish, onOpen }: Props) {
   const { t, lang } = useI18n()
   const [query, setQuery] = useState('')
   const [continent, setContinent] = useState<string>('all')
@@ -25,10 +27,10 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
         if (continent !== 'all' && c.continentKey !== continent) return false
         if (q && !(c.name.toLowerCase().includes(q) || c.nameEn.toLowerCase().includes(q))) return false
         return true
-      }).map((c) => ({ meta: c, stat: countryStat(c, visited) }))
+      }).map((c) => ({ meta: c, stat: countryStat(c, visited), wish: countryWishCount(c, wishlist) }))
       return { key, name: continentLabel(key, lang), list }
     }).filter((g) => g.list.length > 0)
-  }, [query, continent, visited, lang])
+  }, [query, continent, visited, wishlist, lang])
 
   const totalCount = groups.reduce((n, g) => n + g.list.length, 0)
 
@@ -63,7 +65,7 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
             {group.name}
           </h3>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
-            {group.list.map(({ meta, stat }) => (
+            {group.list.map(({ meta, stat, wish }) => (
               <div
                 key={meta.cca2}
                 className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 shadow-sm transition hover:border-teal-200 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-teal-800"
@@ -95,6 +97,17 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
                     </span>
                     {stat.visited}/{stat.total} · {fmtPct(stat.pct)}
                   </span>
+                </button>
+                <button
+                  onClick={() => onToggleWish(meta.cca2)}
+                  title={t('wishlist')}
+                  className={`shrink-0 rounded-lg px-2 py-1 text-sm transition ${
+                    wish > 0
+                      ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950'
+                      : 'text-slate-300 hover:bg-slate-100 hover:text-amber-400 dark:text-slate-600 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  {wish > 0 ? '★' : '☆'}
                 </button>
                 <button
                   onClick={() => onOpen(meta.cca2)}

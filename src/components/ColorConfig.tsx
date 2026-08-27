@@ -6,6 +6,7 @@ import { useI18n } from '../lib/i18n-context'
 
 const FIELDS: { key: keyof MapColors; labelKey: string }[] = [
   { key: 'visited', labelKey: 'countriesVisited' },
+  { key: 'wish', labelKey: 'wishColor' },
   { key: 'notVisited', labelKey: 'notVisitedCountries' },
   { key: 'hover', labelKey: 'hover' },
   { key: 'border', labelKey: 'borders' },

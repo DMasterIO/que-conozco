@@ -21,6 +21,7 @@ export interface CountryMeta {
 
 export interface MapColors {
   visited: string
+  wish: string
   notVisited: string
   hover: string
   border: string

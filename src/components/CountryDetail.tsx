@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import Modal from './Modal'
 import CountryZoomMap from './CountryZoomMap'
 import { byCca2, citiesFor, cityKey } from '../lib/countries'
-import { countryStat, continentStats, fmtPct, worldStat } from '../lib/stats'
+import { countryStat, countryWishCount, continentStats, fmtPct, worldStat } from '../lib/stats'
 import { useStore } from '../store'
 import { useI18n } from '../lib/i18n-context'
 import { countryName, continentLabel } from '../lib/translations'
@@ -10,14 +10,18 @@ import { countryName, continentLabel } from '../lib/translations'
 export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose: () => void }) {
   const visitedArr = useStore((s) => s.visited)
   const visited = useMemo(() => new Set(visitedArr), [visitedArr])
+  const wishArr = useStore((s) => s.wishlist)
+  const wishlist = useMemo(() => new Set(wishArr), [wishArr])
   const colors = useStore((s) => s.colors)
-  const toggleCity = useStore((s) => s.toggleCity)
+  const cycleCity = useStore((s) => s.cycleCity)
   const toggleCountry = useStore((s) => s.toggleCountry)
+  const toggleWishCountry = useStore((s) => s.toggleWishCountry)
   const { t, lang } = useI18n()
   const [query, setQuery] = useState('')
 
   const meta = byCca2.get(cca2)
   const stat = useMemo(() => (meta ? countryStat(meta, visited) : null), [meta, visited])
+  const wishCount = useMemo(() => (meta ? countryWishCount(meta, wishlist) : 0), [meta, wishlist])
   const contAgg = useMemo(
     () => (meta ? continentStats(visited).find((c) => c.key === meta.continentKey) : null),
     [meta, visited],
@@ -59,20 +63,33 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
         <CountryZoomMap
           cca2={cca2}
           visited={visited}
+          wishlist={wishlist}
           colors={colors}
-          onToggleCity={(id) => toggleCity(id)}
+          onToggleCity={(id) => cycleCity(id)}
         />
 
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-slate-500 dark:text-slate-400">
             {t('localitiesVisited', { visited: stat.visited, total: stat.total })}
           </p>
-          <button
-            onClick={() => toggleCountry(cca2)}
-            className="shrink-0 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700"
-          >
-            {stat.status === 'full' ? t('unmarkAll') : t('markAllCountry')}
-          </button>
+          <div className="flex shrink-0 gap-2">
+            <button
+              onClick={() => toggleWishCountry(cca2)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+                wishCount > 0
+                  ? 'bg-amber-500 text-white hover:bg-amber-600'
+                  : 'bg-amber-100 text-amber-700 hover:bg-amber-200 dark:bg-amber-950 dark:text-amber-300 dark:hover:bg-amber-900'
+              }`}
+            >
+              {wishCount > 0 ? t('unwishAll') : t('wishAllCountry')}
+            </button>
+            <button
+              onClick={() => toggleCountry(cca2)}
+              className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700"
+            >
+              {stat.status === 'full' ? t('unmarkAll') : t('markAllCountry')}
+            </button>
+          </div>
         </div>
 
         <input
@@ -91,19 +108,26 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
           {filtered.map((c) => {
             const key = cityKey(c.id)
             const isVisited = visited.has(key)
+            const isWished = wishlist.has(key)
             return (
               <button
                 key={c.id}
-                onClick={() => toggleCity(c.id)}
+                onClick={() => cycleCity(c.id)}
                 className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
               >
                 <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] font-bold text-white transition ${
-                    isVisited ? '' : 'border-slate-300 dark:border-slate-600'
+                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] font-bold transition ${
+                    isVisited || isWished ? '' : 'border-slate-300 dark:border-slate-600'
                   }`}
-                  style={{ background: isVisited ? colors.visited : 'transparent' }}
+                  style={{
+                    background: isVisited
+                      ? colors.visited
+                      : isWished
+                        ? colors.wish
+                        : 'transparent',
+                  }}
                 >
-                  {isVisited ? '✓' : ''}
+                  {isVisited ? '✓' : isWished ? '★' : ''}
                 </span>
                 <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.n}</span>
                 {c.a && <span className="text-xs text-slate-400 dark:text-slate-500">{c.a}</span>}

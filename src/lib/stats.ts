@@ -78,6 +78,27 @@ export function continentStats(visited: Set<string>): ContinentAgg[] {
   return CONTINENT_ORDER.map((key) => map.get(key)!).filter((a) => a.total > 0)
 }
 
+export function countryWishCount(meta: CountryMeta, wishlist: Set<string>): number {
+  let n = 0
+  for (const c of citiesFor(meta.cca2)) {
+    if (wishlist.has(String(c.id))) n++
+  }
+  return n
+}
+
+export interface WishStat {
+  cities: number
+  countries: number
+}
+
+export function wishlistStats(wishlist: Set<string>): WishStat {
+  let countries = 0
+  for (const meta of COUNTRIES) {
+    if (countryWishCount(meta, wishlist) > 0) countries++
+  }
+  return { cities: wishlist.size, countries }
+}
+
 export function mostVisitedCountry(visited: Set<string>): CountryStat | null {
   let best: CountryStat | null = null
   for (const meta of COUNTRIES) {
