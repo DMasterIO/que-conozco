@@ -26,6 +26,8 @@ export interface MapColors {
   border: string
 }
 
+export type Theme = 'light' | 'dark' | 'system'
+
 export type CountryStatus = 'none' | 'partial' | 'full'
 
 export interface ContinentAgg {

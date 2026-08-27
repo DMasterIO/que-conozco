@@ -38,7 +38,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
         <span className="flex items-center gap-2">
           <span>{meta.flag}</span>
           <span>{countryName(meta.name, meta.nameEn, lang)}</span>
-          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-500">
+          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
             {meta.cca2}
           </span>
         </span>
@@ -64,7 +64,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
         />
 
         <div className="flex items-center justify-between gap-3">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {t('localitiesVisited', { visited: stat.visited, total: stat.total })}
           </p>
           <button
@@ -79,12 +79,12 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t('searchLocality', { name: countryName(meta.name, meta.nameEn, lang) })}
-          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
+          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-teal-950"
         />
 
-        <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-100">
+        <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-800">
           {filtered.length === 0 && (
-            <div className="px-4 py-6 text-center text-sm text-slate-400">
+            <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
               {t('noResults', { query })}
             </div>
           )}
@@ -95,19 +95,19 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
               <button
                 key={c.id}
                 onClick={() => toggleCity(c.id)}
-                className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50"
+                className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
               >
                 <span
                   className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] font-bold text-white transition ${
-                    isVisited ? '' : 'border-slate-300'
+                    isVisited ? '' : 'border-slate-300 dark:border-slate-600'
                   }`}
                   style={{ background: isVisited ? colors.visited : 'transparent' }}
                 >
                   {isVisited ? '✓' : ''}
                 </span>
-                <span className="flex-1 truncate text-sm text-slate-700">{c.n}</span>
-                {c.a && <span className="text-xs text-slate-400">{c.a}</span>}
-                <span className="w-20 text-right text-xs text-slate-400">
+                <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.n}</span>
+                {c.a && <span className="text-xs text-slate-400 dark:text-slate-500">{c.a}</span>}
+                <span className="w-20 text-right text-xs text-slate-400 dark:text-slate-500">
                   {c.p.toLocaleString('es')}
                 </span>
               </button>
@@ -121,9 +121,9 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-3">
-      <div className="text-xs text-slate-400">{label}</div>
-      <div className="text-xl font-bold text-slate-800">{value}</div>
+    <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
+      <div className="text-xs text-slate-400 dark:text-slate-500">{label}</div>
+      <div className="text-xl font-bold text-slate-800 dark:text-slate-100">{value}</div>
     </div>
   )
 }

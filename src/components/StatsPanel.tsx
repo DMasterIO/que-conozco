@@ -31,18 +31,18 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         {mostVisited && (
-          <div className="flex items-center gap-3 rounded-xl border border-teal-100 bg-teal-50/60 p-4">
+          <div className="flex items-center gap-3 rounded-xl border border-teal-100 bg-teal-50/60 p-4 dark:border-teal-900 dark:bg-teal-950/40">
             <span className="text-2xl">{mostVisited.meta.flag}</span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-slate-800 dark:text-slate-100">
                   {countryName(mostVisited.meta.name, mostVisited.meta.nameEn, lang)}
                 </span>
-                <span className="text-sm text-slate-500">
+                <span className="text-sm text-slate-500 dark:text-slate-400">
                   {mostVisited.visited}/{mostVisited.total} · {fmtPct(mostVisited.pct)}
                 </span>
               </div>
-              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white">
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white dark:bg-slate-700">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-teal-400 to-teal-600 transition-all"
                   style={{ width: `${Math.min(100, mostVisited.pct)}%` }}
@@ -58,12 +58,12 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
             return (
               <div key={c.key}>
                 <div className="mb-1 flex items-center justify-between text-sm">
-                  <span className="font-medium text-slate-700">{continentLabel(c.key, lang)}</span>
-                  <span className="text-slate-500">
+                  <span className="font-medium text-slate-700 dark:text-slate-200">{continentLabel(c.key, lang)}</span>
+                  <span className="text-slate-500 dark:text-slate-400">
                     {c.visited}/{c.total} · {fmtPct(pct)}
                   </span>
                 </div>
-                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                   <div
                     className="h-full rounded-full bg-gradient-to-r from-teal-400 to-teal-600 transition-all"
                     style={{ width: `${Math.min(100, pct)}%` }}
@@ -80,9 +80,9 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
 
 function Card({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-      <div className="text-xs text-slate-400">{label}</div>
-      <div className="mt-1 truncate text-2xl font-bold text-slate-800">{value}</div>
+    <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800">
+      <div className="text-xs text-slate-400 dark:text-slate-500">{label}</div>
+      <div className="mt-1 truncate text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</div>
     </div>
   )
 }

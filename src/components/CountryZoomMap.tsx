@@ -51,7 +51,7 @@ export default function CountryZoomMap({ cca2, visited, colors, onToggleCity }: 
 
   if (!countryPath) {
     return (
-        <div className="flex h-40 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-400">
+        <div className="flex h-40 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-400 dark:bg-slate-800 dark:text-slate-500">
           {t('detailedMapUnavailable')}
         </div>
     )
@@ -60,7 +60,7 @@ export default function CountryZoomMap({ cca2, visited, colors, onToggleCity }: 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
-      className="w-full rounded-xl bg-slate-50"
+      className="w-full rounded-xl bg-slate-50 dark:bg-slate-800"
       onMouseLeave={() => setHovered(null)}
     >
       <path d={countryPath} fill={colors.notVisited} stroke={colors.border} strokeWidth={1.5} />

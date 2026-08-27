@@ -181,21 +181,21 @@ export default function WorldMap({ visited, colors, onToggle, onOpenCountry }: P
 
       <div className="absolute left-3 top-3 flex flex-col gap-1">
         <button
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:ring-slate-700 dark:hover:bg-slate-800"
           onClick={() => zoomBy(1.25)}
           title={t('zoomIn')}
         >
           +
         </button>
         <button
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:ring-slate-700 dark:hover:bg-slate-800"
           onClick={() => zoomBy(0.8)}
           title={t('zoomOut')}
         >
           −
         </button>
         <button
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-sm shadow ring-1 ring-slate-200 hover:bg-slate-50"
+          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-sm shadow ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:ring-slate-700 dark:hover:bg-slate-800"
           onClick={() => setZoom({ k: 1, x: 0, y: 0 })}
           title={t('restore')}
         >

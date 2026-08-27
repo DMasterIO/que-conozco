@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import WorldMap from './components/WorldMap'
 import CountryList from './components/CountryList'
 import StatsPanel from './components/StatsPanel'
@@ -9,6 +9,8 @@ import { useStore } from './store'
 import { continentStats, fmtPct, worldStat } from './lib/stats'
 import { COUNTRIES, citiesFor } from './lib/countries'
 import { useI18n } from './lib/i18n-context'
+import { applyTheme } from './lib/theme'
+import type { Theme } from './types'
 
 type ModalKind = 'stats' | 'colors' | 'share' | null
 
@@ -22,10 +24,20 @@ export default function App() {
   const selectedCountry = useStore((s) => s.selectedCountry)
   const clearAll = useStore((s) => s.clearAll)
   const importData = useStore((s) => s.importData)
+  const theme = useStore((s) => s.theme)
+  const setTheme = useStore((s) => s.setTheme)
   const { t, lang, setLang } = useI18n()
 
   const [modal, setModal] = useState<ModalKind>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    applyTheme(theme)
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const onChange = () => applyTheme(theme)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [theme])
 
   const visited = useMemo(() => new Set(visitedArr), [visitedArr])
   const world = useMemo(() => worldStat(visited), [visited])
@@ -63,8 +75,8 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800">
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 text-xl">
@@ -72,7 +84,7 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-lg font-bold leading-tight">¿Qué conozco?</h1>
-              <p className="text-xs text-slate-500">{t('appSubtitle')}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">{t('appSubtitle')}</p>
             </div>
           </div>
           <nav className="flex flex-wrap items-center gap-2">
@@ -85,6 +97,7 @@ export default function App() {
                 <HeaderButton onClick={() => fileRef.current?.click()}>⬆ {t('importData')}</HeaderButton>
               </>
             )}
+            <ThemeButton theme={theme} onCycle={setTheme} label={themeLabel(theme)} />
             <HeaderButton onClick={() => setLang(lang === 'es' ? 'en' : 'es')}>
               🌐 {lang === 'es' ? 'EN' : 'ES'}
             </HeaderButton>
@@ -96,10 +109,10 @@ export default function App() {
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6">
-        <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-            <h2 className="text-sm font-semibold text-slate-600">{t('worldMap')}</h2>
-            <span className="text-xs text-slate-400">{t('mapHint')}</span>
+        <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+          <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800">
+            <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300">{t('worldMap')}</h2>
+            <span className="text-xs text-slate-400 dark:text-slate-500">{t('mapHint')}</span>
           </div>
           <WorldMap
             visited={visited}
@@ -107,7 +120,7 @@ export default function App() {
             onToggle={toggleCountry}
             onOpenCountry={setSelectedCountry}
           />
-          <div className="flex items-center gap-4 border-t border-slate-100 px-5 py-2.5 text-xs text-slate-500">
+          <div className="flex items-center gap-4 border-t border-slate-100 px-5 py-2.5 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
             <Legend color={colors.visited} label={t('visited')} />
             <Legend color={colors.notVisited} label={t('notVisited')} />
             <Legend color={colors.hover} label={t('hover')} />
@@ -132,7 +145,7 @@ export default function App() {
           />
         </section>
 
-        <footer className="mt-12 border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+        <footer className="mt-12 border-t border-slate-200 py-6 text-center text-xs text-slate-400 dark:border-slate-800 dark:text-slate-500">
           ¿Qué conozco? · queconozco.com · {t('footerCountries', { n: countriesWithCities })} ·{' '}
           {t('footerNote')}
         </footer>
@@ -163,10 +176,47 @@ function HeaderButton({
     <button
       onClick={onClick}
       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-        danger ? 'text-rose-500 hover:bg-rose-50' : 'text-slate-600 hover:bg-slate-100'
+        danger
+          ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950'
+          : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
       }`}
     >
       {children}
+    </button>
+  )
+}
+
+const THEME_ORDER: Theme[] = ['light', 'dark', 'system']
+const THEME_ICON: Record<Theme, string> = { light: '☀️', dark: '🌙', system: '💻' }
+
+function cycleTheme(theme: Theme): Theme {
+  return THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length]
+}
+
+function themeLabel(theme: Theme): string {
+  return THEME_ICON[theme]
+}
+
+function ThemeButton({
+  theme,
+  onCycle,
+  label,
+}: {
+  theme: Theme
+  onCycle: (next: Theme) => void
+  label: string
+}) {
+  const { t } = useI18n()
+  const title =
+    theme === 'light' ? t('themeLight') : theme === 'dark' ? t('themeDark') : t('themeSystem')
+  return (
+    <button
+      onClick={() => onCycle(cycleTheme(theme))}
+      title={`${t('theme')}: ${title}`}
+      aria-label={`${t('theme')}: ${title}`}
+      className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+    >
+      {label}
     </button>
   )
 }
@@ -182,8 +232,8 @@ function Legend({ color, label }: { color: string; label: string }) {
 
 function QuickStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-      <div className="text-xs text-slate-400">{label}</div>
+    <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
+      <div className="text-xs text-slate-400 dark:text-slate-500">{label}</div>
       <div className="mt-1 text-2xl font-bold">{value}</div>
     </div>
   )

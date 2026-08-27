@@ -12,6 +12,19 @@
     <meta name="apple-mobile-web-app-title" content="¿Qué conozco?" />
     <meta name="description" content="Registra los países y localidades que has visitado sobre un mapa del mundo interactivo." />
     <title>¿Qué conozco? · Mapa de viajes</title>
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('que-conozco-v1')
+          var theme = 'system'
+          if (stored) theme = (JSON.parse(stored).state || {}).theme || 'system'
+          var dark =
+            theme === 'dark' ||
+            (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+          document.documentElement.classList.toggle('dark', dark)
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

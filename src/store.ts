@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { MapColors } from './types'
+import type { MapColors, Theme } from './types'
 import { citiesFor, cityKey } from './lib/countries'
 
 export const DEFAULT_COLORS: MapColors = {
@@ -13,10 +13,12 @@ export const DEFAULT_COLORS: MapColors = {
 interface AppState {
   visited: string[]
   colors: MapColors
+  theme: Theme
   selectedCountry: string | null
   toggleCity: (id: number) => void
   toggleCountry: (cca2: string) => void
   setColors: (colors: MapColors) => void
+  setTheme: (theme: Theme) => void
   setSelectedCountry: (cca2: string | null) => void
   clearAll: () => void
   importData: (data: { visited: string[]; colors: MapColors }) => void
@@ -27,6 +29,7 @@ export const useStore = create<AppState>()(
     (set, get) => ({
       visited: [],
       colors: DEFAULT_COLORS,
+      theme: 'system',
       selectedCountry: null,
 
       toggleCity: (id) => {
@@ -51,10 +54,11 @@ export const useStore = create<AppState>()(
       },
 
       setColors: (colors) => set({ colors }),
+      setTheme: (theme) => set({ theme }),
       setSelectedCountry: (cca2) => set({ selectedCountry: cca2 }),
       clearAll: () => set({ visited: [] }),
       importData: (data) => set({ visited: data.visited, colors: data.colors }),
     }),
-    { name: 'que-conozco-v1', partialize: (s) => ({ visited: s.visited, colors: s.colors }) },
+    { name: 'que-conozco-v1', partialize: (s) => ({ visited: s.visited, colors: s.colors, theme: s.theme }) },
   ),
 )

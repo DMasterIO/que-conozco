@@ -43,12 +43,12 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
           alt="Tarjeta para historias"
           className="h-[420px] rounded-2xl shadow-lg ring-1 ring-slate-200"
         />
-        {status && <p className="text-center text-xs text-slate-500">{status}</p>}
-        <p className="text-center text-xs text-slate-400">{t('shareDescription')}</p>
+        {status && <p className="text-center text-xs text-slate-500 dark:text-slate-400">{status}</p>}
+        <p className="text-center text-xs text-slate-400 dark:text-slate-500">{t('shareDescription')}</p>
         <div className="flex w-full gap-2">
           <button
             onClick={download}
-            className="flex-1 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-200"
+            className="flex-1 rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
           >
             {t('downloadImage')}
           </button>
