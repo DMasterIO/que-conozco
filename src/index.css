@@ -3,6 +3,7 @@
 html {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -14,4 +15,5 @@ body {
     'Segoe UI',
     Roboto,
     sans-serif;
+  overscroll-behavior-y: none;
 }
