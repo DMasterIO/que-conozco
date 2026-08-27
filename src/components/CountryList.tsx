@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
-import { CONTINENT_ORDER, COUNTRIES, CONTINENTS } from '../lib/countries'
+import { CONTINENT_ORDER, COUNTRIES } from '../lib/countries'
 import { countryStat, fmtPct } from '../lib/stats'
 import type { MapColors } from '../types'
+import { useI18n } from '../lib/i18n-context'
+import { countryName, continentLabel } from '../lib/translations'
 
 interface Props {
   visited: Set<string>
@@ -11,6 +13,7 @@ interface Props {
 }
 
 export default function CountryList({ visited, colors, onToggle, onOpen }: Props) {
+  const { t, lang } = useI18n()
   const [query, setQuery] = useState('')
   const [continent, setContinent] = useState<string>('all')
 
@@ -23,9 +26,9 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
         if (q && !(c.name.toLowerCase().includes(q) || c.nameEn.toLowerCase().includes(q))) return false
         return true
       }).map((c) => ({ meta: c, stat: countryStat(c, visited) }))
-      return { key, name: CONTINENTS[key], list }
+      return { key, name: continentLabel(key, lang), list }
     }).filter((g) => g.list.length > 0)
-  }, [query, continent, visited])
+  }, [query, continent, visited, lang])
 
   const totalCount = groups.reduce((n, g) => n + g.list.length, 0)
 
@@ -35,7 +38,7 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar país..."
+          placeholder={t('searchCountry')}
           className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
         />
         <select
@@ -43,16 +46,16 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
           onChange={(e) => setContinent(e.target.value)}
           className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
         >
-          <option value="all">Todos los continentes</option>
+          <option value="all">{t('allContinents')}</option>
           {CONTINENT_ORDER.map((key) => (
             <option key={key} value={key}>
-              {CONTINENTS[key]}
+              {continentLabel(key, lang)}
             </option>
           ))}
         </select>
       </div>
 
-      <div className="text-xs text-slate-500">{totalCount} países</div>
+      <div className="text-xs text-slate-500">{t('countriesCount', { n: totalCount })}</div>
 
       {groups.map((group) => (
         <div key={group.key}>
@@ -67,7 +70,7 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
               >
                 <button
                   onClick={() => onToggle(meta.cca2)}
-                  title={meta.name}
+                  title={countryName(meta.name, meta.nameEn, lang)}
                   className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white transition ${
                     stat.status === 'full'
                       ? 'opacity-100'
@@ -84,7 +87,7 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
                   className="flex min-w-0 flex-1 flex-col items-start text-left"
                 >
                   <span className="truncate text-sm font-medium text-slate-800">
-                    {meta.flag} {meta.name}
+                    {meta.flag} {countryName(meta.name, meta.nameEn, lang)}
                   </span>
                   <span className="flex items-center gap-1.5 text-xs text-slate-400">
                     <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-slate-500">
@@ -97,7 +100,7 @@ export default function CountryList({ visited, colors, onToggle, onOpen }: Props
                   onClick={() => onOpen(meta.cca2)}
                   className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-teal-600 hover:bg-teal-50"
                 >
-                  Ciudades
+                  {t('cities')}
                 </button>
               </div>
             ))}

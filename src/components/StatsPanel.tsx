@@ -2,8 +2,11 @@ import { useMemo } from 'react'
 import Modal from './Modal'
 import { useStore } from '../store'
 import { continentStats, fmtPct, mostVisitedCountry, worldStat } from '../lib/stats'
+import { useI18n } from '../lib/i18n-context'
+import { countryName, continentLabel } from '../lib/translations'
 
 export default function StatsPanel({ onClose }: { onClose: () => void }) {
+  const { t, lang } = useI18n()
   const visitedArr = useStore((s) => s.visited)
   const visited = useMemo(() => new Set(visitedArr), [visitedArr])
   const world = useMemo(() => worldStat(visited), [visited])
@@ -11,15 +14,19 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
   const mostVisited = useMemo(() => mostVisitedCountry(visited), [visited])
 
   return (
-    <Modal title="Estadísticas" onClose={onClose} maxWidth="max-w-2xl">
+    <Modal title={t('stats')} onClose={onClose} maxWidth="max-w-2xl">
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Card label="Países visitados" value={`${world.countriesVisited}/${world.countriesTotal}`} />
-          <Card label="Localidades" value={`${world.visited}/${world.total}`} />
-          <Card label="Mundo" value={fmtPct(world.pct)} />
+          <Card label={t('countriesVisited')} value={`${world.countriesVisited}/${world.countriesTotal}`} />
+          <Card label={t('localities')} value={`${world.visited}/${world.total}`} />
+          <Card label={t('world')} value={fmtPct(world.pct)} />
           <Card
-            label="País más visitado"
-            value={mostVisited ? `${mostVisited.meta.flag} ${mostVisited.meta.name}` : '—'}
+            label={t('mostVisitedCountry')}
+            value={
+              mostVisited
+                ? `${mostVisited.meta.flag} ${countryName(mostVisited.meta.name, mostVisited.meta.nameEn, lang)}`
+                : '—'
+            }
           />
         </div>
 
@@ -28,7 +35,9 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
             <span className="text-2xl">{mostVisited.meta.flag}</span>
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-800">{mostVisited.meta.name}</span>
+                <span className="font-semibold text-slate-800">
+                  {countryName(mostVisited.meta.name, mostVisited.meta.nameEn, lang)}
+                </span>
                 <span className="text-sm text-slate-500">
                   {mostVisited.visited}/{mostVisited.total} · {fmtPct(mostVisited.pct)}
                 </span>
@@ -49,7 +58,7 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
             return (
               <div key={c.key}>
                 <div className="mb-1 flex items-center justify-between text-sm">
-                  <span className="font-medium text-slate-700">{c.name}</span>
+                  <span className="font-medium text-slate-700">{continentLabel(c.key, lang)}</span>
                   <span className="text-slate-500">
                     {c.visited}/{c.total} · {fmtPct(pct)}
                   </span>

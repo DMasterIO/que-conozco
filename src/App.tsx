@@ -8,6 +8,7 @@ import CountryDetail from './components/CountryDetail'
 import { useStore } from './store'
 import { continentStats, fmtPct, worldStat } from './lib/stats'
 import { COUNTRIES, citiesFor } from './lib/countries'
+import { useI18n } from './lib/i18n-context'
 
 type ModalKind = 'stats' | 'colors' | 'share' | null
 
@@ -21,6 +22,7 @@ export default function App() {
   const selectedCountry = useStore((s) => s.selectedCountry)
   const clearAll = useStore((s) => s.clearAll)
   const importData = useStore((s) => s.importData)
+  const { t, lang, setLang } = useI18n()
 
   const [modal, setModal] = useState<ModalKind>(null)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -70,21 +72,24 @@ export default function App() {
             </div>
             <div>
               <h1 className="text-lg font-bold leading-tight">¿Qué conozco?</h1>
-              <p className="text-xs text-slate-500">Tu mapa de países y localidades visitados</p>
+              <p className="text-xs text-slate-500">{t('appSubtitle')}</p>
             </div>
           </div>
           <nav className="flex flex-wrap items-center gap-2">
-            <HeaderButton onClick={() => setModal('share')}>📤 Compartir</HeaderButton>
-            <HeaderButton onClick={() => setModal('colors')}>🎨 Colores</HeaderButton>
-            <HeaderButton onClick={() => setModal('stats')}>📊 Estadísticas</HeaderButton>
+            <HeaderButton onClick={() => setModal('share')}>📤 {t('share')}</HeaderButton>
+            <HeaderButton onClick={() => setModal('colors')}>🎨 {t('colors')}</HeaderButton>
+            <HeaderButton onClick={() => setModal('stats')}>📊 {t('stats')}</HeaderButton>
             {SHOW_IMPORT_EXPORT && (
               <>
-                <HeaderButton onClick={exportJson}>⬇ Exportar</HeaderButton>
-                <HeaderButton onClick={() => fileRef.current?.click()}>⬆ Importar</HeaderButton>
+                <HeaderButton onClick={exportJson}>⬇ {t('exportData')}</HeaderButton>
+                <HeaderButton onClick={() => fileRef.current?.click()}>⬆ {t('importData')}</HeaderButton>
               </>
             )}
+            <HeaderButton onClick={() => setLang(lang === 'es' ? 'en' : 'es')}>
+              🌐 {lang === 'es' ? 'EN' : 'ES'}
+            </HeaderButton>
             <HeaderButton onClick={() => clearAll()} danger>
-              Reiniciar
+              {t('resetAll')}
             </HeaderButton>
           </nav>
         </div>
@@ -93,8 +98,8 @@ export default function App() {
       <main className="mx-auto max-w-7xl px-4 py-6">
         <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3">
-            <h2 className="text-sm font-semibold text-slate-600">Mapa del mundo</h2>
-            <span className="text-xs text-slate-400">Clic: marcar país · Doble clic: ver ciudades</span>
+            <h2 className="text-sm font-semibold text-slate-600">{t('worldMap')}</h2>
+            <span className="text-xs text-slate-400">{t('mapHint')}</span>
           </div>
           <WorldMap
             visited={visited}
@@ -103,22 +108,22 @@ export default function App() {
             onOpenCountry={setSelectedCountry}
           />
           <div className="flex items-center gap-4 border-t border-slate-100 px-5 py-2.5 text-xs text-slate-500">
-            <Legend color={colors.visited} label="Visitado" />
-            <Legend color={colors.notVisited} label="No visitado" />
-            <Legend color={colors.hover} label="Hover" />
-            <Legend color={colors.border} label="Borde" />
+            <Legend color={colors.visited} label={t('visited')} />
+            <Legend color={colors.notVisited} label={t('notVisited')} />
+            <Legend color={colors.hover} label={t('hover')} />
+            <Legend color={colors.border} label={t('border')} />
           </div>
         </section>
 
         <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <QuickStat label="Mundo explorado" value={fmtPct(world.pct)} />
-          <QuickStat label="Países visitados" value={`${world.countriesVisited}/${world.countriesTotal}`} />
-          <QuickStat label="Localidades" value={`${world.visited}/${world.total}`} />
-          <QuickStat label="Continentes" value={`${visitedContinents}/${continents.length}`} />
+          <QuickStat label={t('worldExplored')} value={fmtPct(world.pct)} />
+          <QuickStat label={t('countriesVisited')} value={`${world.countriesVisited}/${world.countriesTotal}`} />
+          <QuickStat label={t('localities')} value={`${world.visited}/${world.total}`} />
+          <QuickStat label={t('continents')} value={`${visitedContinents}/${continents.length}`} />
         </section>
 
         <section className="mt-8">
-          <h2 className="mb-4 text-xl font-bold">Países</h2>
+          <h2 className="mb-4 text-xl font-bold">{t('countries')}</h2>
           <CountryList
             visited={visited}
             colors={colors}
@@ -128,7 +133,8 @@ export default function App() {
         </section>
 
         <footer className="mt-12 border-t border-slate-200 py-6 text-center text-xs text-slate-400">
-          ¿Qué conozco? · queconozco.com · {countriesWithCities} países y sus localidades · tus datos se guardan en tu navegador
+          ¿Qué conozco? · queconozco.com · {t('footerCountries', { n: countriesWithCities })} ·{' '}
+          {t('footerNote')}
         </footer>
       </main>
 

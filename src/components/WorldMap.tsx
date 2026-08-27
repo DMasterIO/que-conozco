@@ -4,6 +4,8 @@ import { worldFeatures } from '../lib/geo'
 import { byCca2, byCcn3 } from '../lib/countries'
 import { countryStat, fmtPct } from '../lib/stats'
 import type { MapColors } from '../types'
+import { useI18n } from '../lib/i18n-context'
+import { countryName } from '../lib/translations'
 
 const W = 1000
 const H = 520
@@ -30,6 +32,7 @@ interface TooltipState {
 }
 
 export default function WorldMap({ visited, colors, onToggle, onOpenCountry }: Props) {
+  const { t } = useI18n()
   const svgRef = useRef<SVGSVGElement>(null)
   const drag = useRef<{
     sx: number
@@ -180,21 +183,21 @@ export default function WorldMap({ visited, colors, onToggle, onOpenCountry }: P
         <button
           className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50"
           onClick={() => zoomBy(1.25)}
-          title="Acercar"
+          title={t('zoomIn')}
         >
           +
         </button>
         <button
           className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50"
           onClick={() => zoomBy(0.8)}
-          title="Alejar"
+          title={t('zoomOut')}
         >
           −
         </button>
         <button
           className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-sm shadow ring-1 ring-slate-200 hover:bg-slate-50"
           onClick={() => setZoom({ k: 1, x: 0, y: 0 })}
-          title="Restablecer"
+          title={t('restore')}
         >
           ⟲
         </button>
@@ -226,6 +229,7 @@ function Tooltip({
   visited: Set<string>
   colors: MapColors
 }) {
+  const { t, lang } = useI18n()
   const meta = byCca2.get(cca2)
   if (!meta) return null
   const stat = countryStat(meta, visited)
@@ -235,7 +239,7 @@ function Tooltip({
       style={{ left: x, top: y - 64 }}
     >
       <div className="font-semibold">
-        {meta.flag} {meta.name}
+        {meta.flag} {countryName(meta.name, meta.nameEn, lang)}
       </div>
       <div className="mt-0.5 flex items-center gap-2 text-slate-300">
         <span
@@ -244,7 +248,7 @@ function Tooltip({
         />
         {stat.visited}/{stat.total} · {fmtPct(stat.pct)}
       </div>
-      <div className="mt-1 text-[10px] text-slate-400">Doble clic para ver ciudades</div>
+      <div className="mt-1 text-[10px] text-slate-400">{t('doubleClickHint')}</div>
     </div>
   )
 }

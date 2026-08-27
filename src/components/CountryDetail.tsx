@@ -4,6 +4,8 @@ import CountryZoomMap from './CountryZoomMap'
 import { byCca2, citiesFor, cityKey } from '../lib/countries'
 import { countryStat, continentStats, fmtPct, worldStat } from '../lib/stats'
 import { useStore } from '../store'
+import { useI18n } from '../lib/i18n-context'
+import { countryName, continentLabel } from '../lib/translations'
 
 export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose: () => void }) {
   const visitedArr = useStore((s) => s.visited)
@@ -11,6 +13,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
   const colors = useStore((s) => s.colors)
   const toggleCity = useStore((s) => s.toggleCity)
   const toggleCountry = useStore((s) => s.toggleCountry)
+  const { t, lang } = useI18n()
   const [query, setQuery] = useState('')
 
   const meta = byCca2.get(cca2)
@@ -34,7 +37,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
       title={
         <span className="flex items-center gap-2">
           <span>{meta.flag}</span>
-          <span>{meta.name}</span>
+          <span>{countryName(meta.name, meta.nameEn, lang)}</span>
           <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-500">
             {meta.cca2}
           </span>
@@ -45,12 +48,12 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
     >
       <div className="flex flex-col gap-6">
         <div className="grid grid-cols-3 gap-3 text-center">
-          <Stat label="País" value={fmtPct(stat.pct)} />
+          <Stat label={t('country')} value={fmtPct(stat.pct)} />
           <Stat
-            label={meta.continent}
+            label={continentLabel(meta.continentKey, lang)}
             value={contAgg ? fmtPct((contAgg.visited / contAgg.total) * 100) : '-'}
           />
-          <Stat label="Mundo" value={fmtPct(world.pct)} />
+          <Stat label={t('world')} value={fmtPct(world.pct)} />
         </div>
 
         <CountryZoomMap
@@ -62,27 +65,27 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
 
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-slate-500">
-            {stat.visited} de {stat.total} localidades visitadas
+            {t('localitiesVisited', { visited: stat.visited, total: stat.total })}
           </p>
           <button
             onClick={() => toggleCountry(cca2)}
             className="shrink-0 rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700"
           >
-            {stat.status === 'full' ? 'Desmarcar todo' : 'Marcar todo el país'}
+            {stat.status === 'full' ? t('unmarkAll') : t('markAllCountry')}
           </button>
         </div>
 
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder={`Buscar localidad en ${meta.name}...`}
+          placeholder={t('searchLocality', { name: countryName(meta.name, meta.nameEn, lang) })}
           className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"
         />
 
         <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-100">
           {filtered.length === 0 && (
             <div className="px-4 py-6 text-center text-sm text-slate-400">
-              Sin resultados para «{query}»
+              {t('noResults', { query })}
             </div>
           )}
           {filtered.map((c) => {

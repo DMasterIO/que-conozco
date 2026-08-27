@@ -3,6 +3,7 @@ import { worldFeatures } from './geo'
 import { byCcn3 } from './countries'
 import { countryStat, fmtPct, mostVisitedCountry, worldStat } from './stats'
 import type { MapColors } from '../types'
+import { messages, type Lang } from './translations'
 
 const W = 1080
 const H = 1920
@@ -26,7 +27,8 @@ function card(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h:
   ctx.stroke()
 }
 
-export function renderStoryCard(visited: Set<string>, colors: MapColors): string {
+export function renderStoryCard(visited: Set<string>, colors: MapColors, lang: Lang): string {
+  const m = messages[lang]
   const canvas = document.createElement('canvas')
   canvas.width = W
   canvas.height = H
@@ -51,7 +53,7 @@ export function renderStoryCard(visited: Set<string>, colors: MapColors): string
 
   ctx.fillStyle = '#94a3b8'
   ctx.font = '500 52px system-ui, sans-serif'
-  ctx.fillText('del mundo explorado', W / 2, 400)
+  ctx.fillText(m.storySubtitle, W / 2, 400)
 
   const mapW = W - 140
   const mapH = 820
@@ -82,8 +84,8 @@ export function renderStoryCard(visited: Set<string>, colors: MapColors): string
   ctx.restore()
 
   const cards: [string, string][] = [
-    ['Países visitados', `${world.countriesVisited} / ${world.countriesTotal}`],
-    ['Localidades visitadas', `${world.visited} / ${world.total}`],
+    [m.countriesVisited, `${world.countriesVisited} / ${world.countriesTotal}`],
+    [m.storyLocalities, `${world.visited} / ${world.total}`],
   ]
   const cardTop = 1400
   const cardH = 200
@@ -108,11 +110,13 @@ export function renderStoryCard(visited: Set<string>, colors: MapColors): string
   const mostVisited = mostVisitedCountry(visited)
   ctx.fillStyle = '#64748b'
   ctx.font = '500 30px system-ui, sans-serif'
-  ctx.fillText('PAÍS MÁS VISITADO', W / 2, bannerTop + 45)
+  ctx.fillText(m.mostVisitedCountry.toUpperCase(), W / 2, bannerTop + 45)
   ctx.fillStyle = '#ffffff'
   ctx.font = '800 46px system-ui, sans-serif'
   ctx.fillText(
-    mostVisited ? `${mostVisited.meta.flag} ${mostVisited.meta.name}` : '—',
+    mostVisited
+      ? `${mostVisited.meta.flag} ${lang === 'en' ? mostVisited.meta.nameEn : mostVisited.meta.name}`
+      : '—',
     W / 2,
     bannerTop + 100,
   )

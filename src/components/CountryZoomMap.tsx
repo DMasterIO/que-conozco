@@ -3,6 +3,7 @@ import { geoPath, geoNaturalEarth1 } from 'd3-geo'
 import { featureForCcn3 } from '../lib/geo'
 import { byCca2, citiesFor } from '../lib/countries'
 import type { MapColors } from '../types'
+import { useI18n } from '../lib/i18n-context'
 
 const W = 600
 const H = 400
@@ -23,6 +24,7 @@ interface Props {
 }
 
 export default function CountryZoomMap({ cca2, visited, colors, onToggleCity }: Props) {
+  const { t } = useI18n()
   const [hovered, setHovered] = useState<Dot | null>(null)
 
   const { countryPath, dots } = useMemo(() => {
@@ -49,9 +51,9 @@ export default function CountryZoomMap({ cca2, visited, colors, onToggleCity }: 
 
   if (!countryPath) {
     return (
-      <div className="flex h-40 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-400">
-        Mapa detallado no disponible
-      </div>
+        <div className="flex h-40 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-400">
+          {t('detailedMapUnavailable')}
+        </div>
     )
   }
 
