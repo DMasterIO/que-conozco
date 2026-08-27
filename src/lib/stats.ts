@@ -1,5 +1,5 @@
 import type { CountryMeta, ContinentAgg } from '../types'
-import { citiesFor, CONTINENTS, CONTINENT_ORDER, COUNTRIES } from './countries'
+import { countryCityIds, CONTINENTS, CONTINENT_ORDER, COUNTRIES } from './countries'
 
 export interface CountryStat {
   meta: CountryMeta
@@ -10,11 +10,11 @@ export interface CountryStat {
 }
 
 export function countryStat(meta: CountryMeta, visited: Set<string>): CountryStat {
-  const cities = citiesFor(meta.cca2)
-  const total = cities.length
+  const ids = countryCityIds(meta.cca2)
+  const total = ids.length
   let visitedCount = 0
-  for (const c of cities) {
-    if (visited.has(String(c.id))) visitedCount++
+  for (const id of ids) {
+    if (visited.has(String(id))) visitedCount++
   }
   const status =
     total === 0 ? 'none' : visitedCount === 0 ? 'none' : visitedCount === total ? 'full' : 'partial'
@@ -41,14 +41,14 @@ export function worldStat(visited: Set<string>): WorldStat {
   let countriesVisited = 0
   let countriesTotal = 0
   for (const meta of COUNTRIES) {
-    const cities = citiesFor(meta.cca2)
-    if (cities.length === 0) continue
+    const ids = countryCityIds(meta.cca2)
+    if (ids.length === 0) continue
     countriesTotal++
     let cVisited = 0
-    for (const c of cities) {
-      if (visited.has(String(c.id))) cVisited++
+    for (const id of ids) {
+      if (visited.has(String(id))) cVisited++
     }
-    total += cities.length
+    total += ids.length
     visitedCount += cVisited
     if (cVisited > 0) countriesVisited++
   }
@@ -69,10 +69,10 @@ export function continentStats(visited: Set<string>): ContinentAgg[] {
   for (const meta of COUNTRIES) {
     const agg = map.get(meta.continentKey)
     if (!agg) continue
-    const cities = citiesFor(meta.cca2)
-    agg.total += cities.length
-    for (const c of cities) {
-      if (visited.has(String(c.id))) agg.visited++
+    const ids = countryCityIds(meta.cca2)
+    agg.total += ids.length
+    for (const id of ids) {
+      if (visited.has(String(id))) agg.visited++
     }
   }
   return CONTINENT_ORDER.map((key) => map.get(key)!).filter((a) => a.total > 0)
@@ -80,8 +80,8 @@ export function continentStats(visited: Set<string>): ContinentAgg[] {
 
 export function countryWishCount(meta: CountryMeta, wishlist: Set<string>): number {
   let n = 0
-  for (const c of citiesFor(meta.cca2)) {
-    if (wishlist.has(String(c.id))) n++
+  for (const id of countryCityIds(meta.cca2)) {
+    if (wishlist.has(String(id))) n++
   }
   return n
 }

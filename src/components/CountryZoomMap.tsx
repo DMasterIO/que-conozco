@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { geoPath, geoNaturalEarth1 } from 'd3-geo'
 import { featureForCcn3 } from '../lib/geo'
-import { byCca2, citiesFor } from '../lib/countries'
-import type { MapColors } from '../types'
+import { byCca2 } from '../lib/countries'
+import type { MapColors, City } from '../types'
 import { useI18n } from '../lib/i18n-context'
 
 const W = 600
@@ -18,13 +18,14 @@ interface Dot {
 
 interface Props {
   cca2: string
+  cities: City[]
   visited: Set<string>
   wishlist: Set<string>
   colors: MapColors
   onToggleCity: (id: number) => void
 }
 
-export default function CountryZoomMap({ cca2, visited, wishlist, colors, onToggleCity }: Props) {
+export default function CountryZoomMap({ cca2, cities, visited, wishlist, colors, onToggleCity }: Props) {
   const { t } = useI18n()
   const [hovered, setHovered] = useState<Dot | null>(null)
 
@@ -43,12 +44,12 @@ export default function CountryZoomMap({ cca2, visited, wishlist, colors, onTogg
     )
     const path = geoPath(p)
     const dots: Dot[] = []
-    for (const c of citiesFor(cca2)) {
+    for (const c of cities) {
       const pt = p([c.lng, c.lat])
       if (pt) dots.push({ id: c.id, name: c.n, admin: c.a, x: pt[0], y: pt[1] })
     }
     return { countryPath: path(feature), dots }
-  }, [cca2])
+  }, [cca2, cities])
 
   if (!countryPath) {
     return (

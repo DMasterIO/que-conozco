@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { MapColors, Theme } from './types'
-import { citiesFor, cityKey } from './lib/countries'
+import { countryCityIds, cityKey } from './lib/countries'
 
 export const DEFAULT_COLORS: MapColors = {
   visited: '#14b8a6',
@@ -57,10 +57,10 @@ export const useStore = create<AppState>()(
       },
 
       toggleCountry: (cca2) => {
-        const cities = citiesFor(cca2)
-        if (cities.length === 0) return
+        const ids = countryCityIds(cca2)
+        if (ids.length === 0) return
         const visited = new Set(get().visited)
-        const keys = cities.map((c) => cityKey(c.id))
+        const keys = ids.map((id) => cityKey(id))
         const allVisited = keys.every((k) => visited.has(k))
         if (allVisited) {
           set({ visited: get().visited.filter((k) => !keys.includes(k)) })
@@ -74,10 +74,10 @@ export const useStore = create<AppState>()(
       },
 
       toggleWishCountry: (cca2) => {
-        const cities = citiesFor(cca2)
-        if (cities.length === 0) return
+        const ids = countryCityIds(cca2)
+        if (ids.length === 0) return
         const wishlist = new Set(get().wishlist)
-        const keys = cities.map((c) => cityKey(c.id))
+        const keys = ids.map((id) => cityKey(id))
         const allWished = keys.every((k) => wishlist.has(k))
         if (allWished) {
           set({ wishlist: get().wishlist.filter((k) => !keys.includes(k)) })

@@ -1,6 +1,6 @@
 import type { CountryMeta, City } from '../types'
-import { cities } from '../data/cities'
 import { worldCountries } from '../data/countries'
+import { countryCities } from '../data/countryCities'
 
 export const CONTINENTS: Record<string, string> = {
   'north-america': 'América del Norte',
@@ -83,33 +83,24 @@ for (const c of COUNTRIES) {
   byCca2.set(c.cca2, c)
 }
 
-export const citiesByCountry = new Map<string, City[]>()
-for (const city of cities) {
-  const list = citiesByCountry.get(city.c) ?? []
-  list.push(city)
-  citiesByCountry.set(city.c, list)
-}
-
-function compareCity(a: City, b: City): number {
-  const ra = a.a ?? ''
-  const rb = b.a ?? ''
-  if (ra !== rb) {
-    if (ra === '') return 1
-    if (rb === '') return -1
-    const byRegion = ra.localeCompare(rb, 'es')
-    if (byRegion !== 0) return byRegion
-  }
-  return a.n.localeCompare(b.n, 'es')
-}
-
-for (const list of citiesByCountry.values()) {
-  list.sort(compareCity)
-}
-
 export function cityKey(id: number): string {
   return String(id)
 }
 
-export function citiesFor(cca2: string): City[] {
-  return citiesByCountry.get(cca2) ?? []
+export function countryCityIds(cca2: string): number[] {
+  return countryCities[cca2] ?? []
+}
+
+const cityDetailsCache = new Map<string, City[]>()
+
+export async function loadCityDetails(cca2: string): Promise<City[]> {
+  const cached = cityDetailsCache.get(cca2)
+  if (cached) return cached
+  const base = import.meta.env.BASE_URL ?? './'
+  const res = await fetch(`${base}data/${cca2}.json`)
+  if (!res.ok) throw new Error(`Failed to load localities for ${cca2}`)
+  const list = (await res.json()) as Omit<City, 'c'>[]
+  const full = list.map((d) => ({ ...d, c: cca2 }))
+  cityDetailsCache.set(cca2, full)
+  return full
 }

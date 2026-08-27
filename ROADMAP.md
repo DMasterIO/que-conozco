@@ -12,7 +12,7 @@ Lista de ideas y trabajo futuro de **¿Qué conozco?** (queconozco.com). Sirve c
 - [x] 2. PWA + mobile
 - [x] 3. Dark mode
 - [x] 4. Wishlist "quiero ir"
-- [ ] 5. Lazy-load de datos (split por país)
+- [x] 5. Lazy-load de datos (split por país)
 - [ ] 6. Tests
 
 ## Backlog

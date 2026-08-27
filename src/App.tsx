@@ -7,7 +7,7 @@ import ShareModal from './components/ShareModal'
 import CountryDetail from './components/CountryDetail'
 import { useStore } from './store'
 import { continentStats, fmtPct, worldStat } from './lib/stats'
-import { COUNTRIES, citiesFor } from './lib/countries'
+import { COUNTRIES, countryCityIds } from './lib/countries'
 import { useI18n } from './lib/i18n-context'
 import { applyTheme } from './lib/theme'
 import type { Theme } from './types'
@@ -46,7 +46,7 @@ export default function App() {
   const world = useMemo(() => worldStat(visited), [visited])
   const continents = useMemo(() => continentStats(visited), [visited])
 
-  const countriesWithCities = COUNTRIES.filter((c) => citiesFor(c.cca2).length > 0).length
+  const countriesWithCities = COUNTRIES.filter((c) => countryCityIds(c.cca2).length > 0).length
   const visitedContinents = continents.filter((c) => c.visited > 0).length
 
   function exportJson() {

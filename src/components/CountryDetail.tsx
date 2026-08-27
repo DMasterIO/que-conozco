@@ -1,11 +1,12 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Modal from './Modal'
 import CountryZoomMap from './CountryZoomMap'
-import { byCca2, citiesFor, cityKey } from '../lib/countries'
+import { byCca2, cityKey, loadCityDetails } from '../lib/countries'
 import { countryStat, countryWishCount, continentStats, fmtPct, worldStat } from '../lib/stats'
 import { useStore } from '../store'
 import { useI18n } from '../lib/i18n-context'
 import { countryName, continentLabel } from '../lib/translations'
+import type { City } from '../types'
 
 export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose: () => void }) {
   const visitedArr = useStore((s) => s.visited)
@@ -18,6 +19,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
   const toggleWishCountry = useStore((s) => s.toggleWishCountry)
   const { t, lang } = useI18n()
   const [query, setQuery] = useState('')
+  const [loaded, setLoaded] = useState<{ cca2: string; cities: City[] } | null>(null)
 
   const meta = byCca2.get(cca2)
   const stat = useMemo(() => (meta ? countryStat(meta, visited) : null), [meta, visited])
@@ -28,13 +30,28 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
   )
   const world = useMemo(() => worldStat(visited), [visited])
 
+  useEffect(() => {
+    let active = true
+    loadCityDetails(cca2)
+      .then((list) => {
+        if (active) setLoaded({ cca2, cities: list })
+      })
+      .catch(() => {
+        if (active) setLoaded({ cca2, cities: [] })
+      })
+    return () => {
+      active = false
+    }
+  }, [cca2])
+
   if (!meta || !stat) return null
 
-  const cities = citiesFor(cca2)
+  const loading = loaded === null || loaded.cca2 !== cca2
+  const cityList = loading ? [] : loaded.cities
   const q = normalize(query.trim())
   const filtered = q
-    ? cities.filter((c) => normalize(c.n).includes(q) || normalize(c.a ?? '').includes(q))
-    : cities
+    ? cityList.filter((c) => normalize(c.n).includes(q) || normalize(c.a ?? '').includes(q))
+    : cityList
 
   return (
     <Modal
@@ -62,6 +79,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
 
         <CountryZoomMap
           cca2={cca2}
+          cities={cityList}
           visited={visited}
           wishlist={wishlist}
           colors={colors}
@@ -100,7 +118,12 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
         />
 
         <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-800">
-          {filtered.length === 0 && (
+          {loading && (
+            <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+              {t('loading')}
+            </div>
+          )}
+          {!loading && filtered.length === 0 && (
             <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
               {t('noResults', { query })}
             </div>
