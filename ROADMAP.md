@@ -55,6 +55,34 @@ Lista de ideas y trabajo futuro de **¿Qué conozco?** (queconozco.com). Sirve c
 - [ ] Stats en Web Worker — esfuerzo `alto`, backend `no`
 
 ### Mobile / PWA
-- [ ] PWA instalable + offline (manifest, service worker) — esfuerzo `medio`, backend `no`
-- [ ] Iconos y add-to-home-screen — esfuerzo `bajo`, backend `no`
-- [ ] Gestos táctiles y safe-area — esfuerzo `bajo`, backend `no`
+- [x] PWA instalable + offline (manifest, service worker) — esfuerzo `medio`, backend `no`
+- [x] Iconos y add-to-home-screen — esfuerzo `bajo`, backend `no`
+- [x] Gestos táctiles y safe-area — esfuerzo `bajo`, backend `no`
+
+### IA (Chrome built-in AI)
+> Experimental (flags / Early Preview / origin trial). Toda feature debe usar feature-detection + fallback elegante. Translator y Language Detector solo funcionan en desktop.
+
+#### Fundacional
+- [ ] Wrapper `src/lib/ai.ts` con detección de APIs + fallback — esfuerzo `bajo`, backend `no`
+
+#### Prompt API (Gemini Nano on-device)
+- [ ] Recap anual narrativo (estilo Wrapped) con tus stats — esfuerzo `medio`, backend `no`
+- [ ] Copiloto de viajes: chat sobre tu mapa ("¿qué me falta en Europa?") — esfuerzo `alto`, backend `no`
+- [ ] Notas auto: "escribe un recuerdo" al marcar un país — esfuerzo `medio`, backend `no`
+- [ ] Sugerir próximo destino según tu patrón — esfuerzo `medio`, backend `no`
+- [ ] Trivia (capitales/banderas de tus países visitados) — esfuerzo `bajo`, backend `no`
+- [ ] Etiquetar/clasificar notas o fotos — esfuerzo `medio`, backend `no`
+
+#### Summarizer
+- [ ] Resumir artículo de Wikipedia del país a 1 párrafo — esfuerzo `bajo`, backend `no`
+- [ ] Resumir diario de viaje para la tarjeta de compartir — esfuerzo `bajo`, backend `no`
+
+#### Writer / Rewriter / Proofreader
+- [ ] Generar caption de Instagram con tus stats — esfuerzo `bajo`, backend `no`
+- [ ] Reescribir notas (tono/largo) — esfuerzo `bajo`, backend `no`
+- [ ] Corregir gramática de notas/diario — esfuerzo `bajo`, backend `no`
+
+#### Translator / Language Detector (solo desktop)
+- [ ] Traducir notas entre idiomas — esfuerzo `medio`, backend `no`
+- [ ] Traducir nombres de localidades / Wikipedia al idioma del usuario — esfuerzo `medio`, backend `no`
+- [ ] Detectar idioma de notas para etiquetar/traducir — esfuerzo `bajo`, backend `no`
