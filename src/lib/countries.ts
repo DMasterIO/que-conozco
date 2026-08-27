@@ -90,6 +90,22 @@ for (const city of cities) {
   citiesByCountry.set(city.c, list)
 }
 
+function compareCity(a: City, b: City): number {
+  const ra = a.a ?? ''
+  const rb = b.a ?? ''
+  if (ra !== rb) {
+    if (ra === '') return 1
+    if (rb === '') return -1
+    const byRegion = ra.localeCompare(rb, 'es')
+    if (byRegion !== 0) return byRegion
+  }
+  return a.n.localeCompare(b.n, 'es')
+}
+
+for (const list of citiesByCountry.values()) {
+  list.sort(compareCity)
+}
+
 export function cityKey(id: number): string {
   return String(id)
 }
