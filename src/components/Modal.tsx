@@ -13,10 +13,15 @@ export default function Modal({ title, onClose, children, maxWidth = 'max-w-2xl'
   const dialogRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
   const prevFocus = useRef<HTMLElement | null>(null)
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     prevFocus.current = document.activeElement as HTMLElement | null
-    closeRef.current?.focus()
+    closeRef.current?.focus({ preventScroll: true })
 
     const prevOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
@@ -24,7 +29,7 @@ export default function Modal({ title, onClose, children, maxWidth = 'max-w-2xl'
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.stopPropagation()
-        onClose()
+        onCloseRef.current()
         return
       }
       if (e.key !== 'Tab') return
@@ -51,9 +56,9 @@ export default function Modal({ title, onClose, children, maxWidth = 'max-w-2xl'
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = prevOverflow
-      prevFocus.current?.focus?.()
+      prevFocus.current?.focus?.({ preventScroll: true })
     }
-  }, [onClose])
+  }, [])
 
   return (
     <div
