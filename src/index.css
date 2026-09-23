@@ -19,3 +19,11 @@ body {
     sans-serif;
   overscroll-behavior-y: none;
 }
+
+.country-path {
+  transition: fill 150ms ease;
+}
+
+.country-path:hover {
+  fill: var(--map-hover, #0f766e);
+}
