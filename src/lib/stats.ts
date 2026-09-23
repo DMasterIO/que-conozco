@@ -9,7 +9,20 @@ export interface CountryStat {
   pct: number
 }
 
+const countryStatCache = new WeakMap<Set<string>, Map<string, CountryStat>>()
+const countryWishCache = new WeakMap<Set<string>, Map<string, number>>()
+const worldStatCache = new WeakMap<Set<string>, WorldStat>()
+const continentStatsCache = new WeakMap<Set<string>, ContinentAgg[]>()
+
 export function countryStat(meta: CountryMeta, visited: Set<string>): CountryStat {
+  let perSet = countryStatCache.get(visited)
+  if (!perSet) {
+    perSet = new Map()
+    countryStatCache.set(visited, perSet)
+  }
+  const cached = perSet.get(meta.cca2)
+  if (cached) return cached
+
   const ids = countryCityIds(meta.cca2)
   const total = ids.length
   let visitedCount = 0
@@ -18,13 +31,15 @@ export function countryStat(meta: CountryMeta, visited: Set<string>): CountrySta
   }
   const status =
     total === 0 ? 'none' : visitedCount === 0 ? 'none' : visitedCount === total ? 'full' : 'partial'
-  return {
+  const result: CountryStat = {
     meta,
     total,
     visited: visitedCount,
     status,
     pct: total === 0 ? 0 : (visitedCount / total) * 100,
   }
+  perSet.set(meta.cca2, result)
+  return result
 }
 
 export interface WorldStat {
@@ -36,6 +51,9 @@ export interface WorldStat {
 }
 
 export function worldStat(visited: Set<string>): WorldStat {
+  const cached = worldStatCache.get(visited)
+  if (cached) return cached
+
   let total = 0
   let visitedCount = 0
   let countriesVisited = 0
@@ -52,16 +70,21 @@ export function worldStat(visited: Set<string>): WorldStat {
     visitedCount += cVisited
     if (cVisited > 0) countriesVisited++
   }
-  return {
+  const result: WorldStat = {
     total,
     visited: visitedCount,
     pct: total === 0 ? 0 : (visitedCount / total) * 100,
     countriesVisited,
     countriesTotal,
   }
+  worldStatCache.set(visited, result)
+  return result
 }
 
 export function continentStats(visited: Set<string>): ContinentAgg[] {
+  const cached = continentStatsCache.get(visited)
+  if (cached) return cached
+
   const map = new Map<string, ContinentAgg>()
   for (const key of CONTINENT_ORDER) {
     map.set(key, { key, name: CONTINENTS[key], total: 0, visited: 0 })
@@ -75,14 +98,25 @@ export function continentStats(visited: Set<string>): ContinentAgg[] {
       if (visited.has(String(id))) agg.visited++
     }
   }
-  return CONTINENT_ORDER.map((key) => map.get(key)!).filter((a) => a.total > 0)
+  const result = CONTINENT_ORDER.map((key) => map.get(key)!).filter((a) => a.total > 0)
+  continentStatsCache.set(visited, result)
+  return result
 }
 
 export function countryWishCount(meta: CountryMeta, wishlist: Set<string>): number {
+  let perSet = countryWishCache.get(wishlist)
+  if (!perSet) {
+    perSet = new Map()
+    countryWishCache.set(wishlist, perSet)
+  }
+  const cached = perSet.get(meta.cca2)
+  if (cached !== undefined) return cached
+
   let n = 0
   for (const id of countryCityIds(meta.cca2)) {
     if (wishlist.has(String(id))) n++
   }
+  perSet.set(meta.cca2, n)
   return n
 }
 
