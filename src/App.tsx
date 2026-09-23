@@ -5,6 +5,7 @@ import StatsPanel from './components/StatsPanel'
 import ColorConfig from './components/ColorConfig'
 import ShareModal from './components/ShareModal'
 import CountryDetail from './components/CountryDetail'
+import Modal from './components/Modal'
 import { useStore } from './store'
 import { continentStats, fmtPct, worldStat } from './lib/stats'
 import { COUNTRIES, countryCityIds } from './lib/countries'
@@ -28,10 +29,19 @@ export default function App() {
   const importData = useStore((s) => s.importData)
   const theme = useStore((s) => s.theme)
   const setTheme = useStore((s) => s.setTheme)
+  const canUndo = useStore((s) => s.canUndo)
+  const undo = useStore((s) => s.undo)
   const { t, lang, setLang } = useI18n()
 
   const [modal, setModal] = useState<ModalKind>(null)
+  const [confirmReset, setConfirmReset] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  const isTouch = useMemo(
+    () => typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches,
+    [],
+  )
 
   useEffect(() => {
     applyTheme(theme)
@@ -48,6 +58,7 @@ export default function App() {
 
   const countriesWithCities = COUNTRIES.filter((c) => countryCityIds(c.cca2).length > 0).length
   const visitedContinents = continents.filter((c) => c.visited > 0).length
+  const isEmpty = visitedArr.length === 0 && wishArr.length === 0
 
   function exportJson() {
     const data = JSON.stringify({ visited: visitedArr, wishlist: wishArr, colors }, null, 2)
@@ -81,6 +92,11 @@ export default function App() {
     e.target.value = ''
   }
 
+  const openModal = (kind: ModalKind) => {
+    setModal(kind)
+    setMenuOpen(false)
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
@@ -94,32 +110,75 @@ export default function App() {
               <p className="text-xs text-slate-500 dark:text-slate-400">{t('appSubtitle')}</p>
             </div>
           </div>
-          <nav className="flex flex-wrap items-center gap-2">
-            <HeaderButton onClick={() => setModal('share')}>📤 {t('share')}</HeaderButton>
-            <HeaderButton onClick={() => setModal('colors')}>🎨 {t('colors')}</HeaderButton>
-            <HeaderButton onClick={() => setModal('stats')}>📊 {t('stats')}</HeaderButton>
-            {SHOW_IMPORT_EXPORT && (
-              <>
-                <HeaderButton onClick={exportJson}>⬇ {t('exportData')}</HeaderButton>
-                <HeaderButton onClick={() => fileRef.current?.click()}>⬆ {t('importData')}</HeaderButton>
-              </>
-            )}
-            <ThemeButton theme={theme} onCycle={setTheme} label={themeLabel(theme)} />
-            <HeaderButton onClick={() => setLang(lang === 'es' ? 'en' : 'es')}>
-              🌐 {lang === 'es' ? 'EN' : 'ES'}
-            </HeaderButton>
-            <HeaderButton onClick={() => clearAll()} danger>
-              {t('resetAll')}
-            </HeaderButton>
+          <nav className="flex items-center gap-2">
+            <div className="hidden items-center gap-2 sm:flex">
+              <HeaderButton onClick={() => setModal('share')}>📤 {t('share')}</HeaderButton>
+              <HeaderButton onClick={() => setModal('colors')}>🎨 {t('colors')}</HeaderButton>
+              <HeaderButton onClick={() => setModal('stats')}>📊 {t('stats')}</HeaderButton>
+              {SHOW_IMPORT_EXPORT && (
+                <>
+                  <HeaderButton onClick={exportJson}>⬇ {t('exportData')}</HeaderButton>
+                  <HeaderButton onClick={() => fileRef.current?.click()}>⬆ {t('importData')}</HeaderButton>
+                </>
+              )}
+              <ThemeControl theme={theme} onSelect={setTheme} />
+              <HeaderButton onClick={() => setLang(lang === 'es' ? 'en' : 'es')}>
+                🌐 {lang === 'es' ? 'EN' : 'ES'}
+              </HeaderButton>
+              <HeaderButton onClick={() => setConfirmReset(true)} danger>
+                {t('resetAll')}
+              </HeaderButton>
+            </div>
+
+            <div className="relative sm:hidden">
+              <HeaderButton onClick={() => setMenuOpen((o) => !o)} ariaLabel={t('menu')}>
+                ⋯
+              </HeaderButton>
+              {menuOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                  <div className="absolute right-0 top-full z-50 mt-2 w-60 rounded-xl border border-slate-100 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+                    <MenuItem onClick={() => openModal('share')}>📤 {t('share')}</MenuItem>
+                    <MenuItem onClick={() => openModal('colors')}>🎨 {t('colors')}</MenuItem>
+                    <MenuItem onClick={() => openModal('stats')}>📊 {t('stats')}</MenuItem>
+                    {SHOW_IMPORT_EXPORT && (
+                      <>
+                        <MenuItem onClick={() => { exportJson(); setMenuOpen(false) }}>⬇ {t('exportData')}</MenuItem>
+                        <MenuItem onClick={() => { fileRef.current?.click(); setMenuOpen(false) }}>⬆ {t('importData')}</MenuItem>
+                      </>
+                    )}
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+                    <div className="flex items-center justify-between px-2 py-1.5">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">{t('theme')}</span>
+                      <ThemeControl theme={theme} onSelect={setTheme} />
+                    </div>
+                    <MenuItem onClick={() => setLang(lang === 'es' ? 'en' : 'es')}>
+                      🌐 {lang === 'es' ? 'English' : 'Español'}
+                    </MenuItem>
+                    <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+                    <MenuItem onClick={() => { setConfirmReset(true); setMenuOpen(false) }} danger>
+                      {t('resetAll')}
+                    </MenuItem>
+                  </div>
+                </>
+              )}
+            </div>
           </nav>
         </div>
       </header>
 
       <main className="mx-auto max-w-7xl px-4 py-6">
+        {isEmpty && (
+          <section className="mb-6 rounded-2xl border border-teal-100 bg-teal-50/60 p-4 dark:border-teal-900 dark:bg-teal-950/40">
+            <div className="font-semibold text-teal-900 dark:text-teal-100">{t('onboardingTitle')}</div>
+            <p className="mt-1 text-sm text-teal-800/80 dark:text-teal-200/80">{t('onboardingText')}</p>
+          </section>
+        )}
+
         <section className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 dark:bg-slate-900 dark:ring-slate-800">
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3 dark:border-slate-800">
             <h2 className="text-sm font-semibold text-slate-600 dark:text-slate-300">{t('worldMap')}</h2>
-            <span className="text-xs text-slate-400 dark:text-slate-500">{t('mapHint')}</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">{t(isTouch ? 'touchHint' : 'mapHint')}</span>
           </div>
           <WorldMap
             visited={visited}
@@ -130,9 +189,9 @@ export default function App() {
           />
           <div className="flex items-center gap-4 border-t border-slate-100 px-5 py-2.5 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
             <Legend color={colors.visited} label={t('visited')} />
+            <Legend color={colors.visited} label={t('partial')} opacity={0.6} />
             <Legend color={colors.wish} label={t('wishlist')} />
             <Legend color={colors.notVisited} label={t('notVisited')} />
-            <Legend color={colors.hover} label={t('hover')} />
             <Legend color={colors.border} label={t('border')} />
           </div>
         </section>
@@ -169,6 +228,38 @@ export default function App() {
         <CountryDetail cca2={selectedCountry} onClose={() => setSelectedCountry(null)} />
       )}
 
+      {confirmReset && (
+        <Modal title={t('resetConfirmTitle')} onClose={() => setConfirmReset(false)} maxWidth="max-w-sm">
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t('resetConfirmText')}</p>
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              onClick={() => setConfirmReset(false)}
+              className="rounded-xl px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+            >
+              {t('cancel')}
+            </button>
+            <button
+              onClick={() => {
+                clearAll()
+                setConfirmReset(false)
+              }}
+              className="rounded-xl bg-rose-600 px-5 py-2 text-sm font-medium text-white hover:bg-rose-700"
+            >
+              {t('resetConfirm')}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {canUndo && (
+        <button
+          onClick={undo}
+          className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-lg ring-1 ring-slate-700 transition hover:bg-slate-700 dark:bg-slate-800 dark:ring-slate-600"
+        >
+          ↩ {t('undo')}
+        </button>
+      )}
+
       <input ref={fileRef} type="file" accept="application/json" className="hidden" onChange={onImportFile} />
     </div>
   )
@@ -178,14 +269,17 @@ function HeaderButton({
   children,
   onClick,
   danger,
+  ariaLabel,
 }: {
   children: React.ReactNode
   onClick: () => void
   danger?: boolean
+  ariaLabel?: string
 }) {
   return (
     <button
       onClick={onClick}
+      aria-label={ariaLabel}
       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
         danger
           ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950'
@@ -197,45 +291,67 @@ function HeaderButton({
   )
 }
 
-const THEME_ORDER: Theme[] = ['light', 'dark', 'system']
-const THEME_ICON: Record<Theme, string> = { light: '☀️', dark: '🌙', system: '💻' }
-
-function cycleTheme(theme: Theme): Theme {
-  return THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length]
-}
-
-function themeLabel(theme: Theme): string {
-  return THEME_ICON[theme]
-}
-
-function ThemeButton({
-  theme,
-  onCycle,
-  label,
+function MenuItem({
+  children,
+  onClick,
+  danger,
 }: {
-  theme: Theme
-  onCycle: (next: Theme) => void
-  label: string
+  children: React.ReactNode
+  onClick: () => void
+  danger?: boolean
 }) {
-  const { t } = useI18n()
-  const title =
-    theme === 'light' ? t('themeLight') : theme === 'dark' ? t('themeDark') : t('themeSystem')
   return (
     <button
-      onClick={() => onCycle(cycleTheme(theme))}
-      title={`${t('theme')}: ${title}`}
-      aria-label={`${t('theme')}: ${title}`}
-      className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+      onClick={onClick}
+      className={`flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium transition ${
+        danger
+          ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950'
+          : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
+      }`}
     >
-      {label}
+      {children}
     </button>
   )
 }
 
-function Legend({ color, label }: { color: string; label: string }) {
+const THEME_OPTIONS: { value: Theme; icon: string; labelKey: string }[] = [
+  { value: 'light', icon: '☀️', labelKey: 'themeLight' },
+  { value: 'dark', icon: '🌙', labelKey: 'themeDark' },
+  { value: 'system', icon: '💻', labelKey: 'themeSystem' },
+]
+
+function ThemeControl({ theme, onSelect }: { theme: Theme; onSelect: (next: Theme) => void }) {
+  const { t } = useI18n()
+  return (
+    <div
+      className="flex items-center gap-0.5 rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800"
+      role="group"
+      aria-label={t('theme')}
+    >
+      {THEME_OPTIONS.map((o) => (
+        <button
+          key={o.value}
+          onClick={() => onSelect(o.value)}
+          title={t(o.labelKey)}
+          aria-label={t(o.labelKey)}
+          aria-pressed={theme === o.value}
+          className={`flex h-7 w-7 items-center justify-center rounded-md text-sm transition ${
+            theme === o.value
+              ? 'bg-white shadow-sm dark:bg-slate-600'
+              : 'hover:bg-white/60 dark:hover:bg-slate-700'
+          }`}
+        >
+          {o.icon}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function Legend({ color, label, opacity = 1 }: { color: string; label: string; opacity?: number }) {
   return (
     <span className="flex items-center gap-1.5">
-      <span className="h-3 w-3 rounded-sm ring-1 ring-black/10" style={{ background: color }} />
+      <span className="h-3 w-3 rounded-sm ring-1 ring-black/10" style={{ background: color, opacity }} />
       {label}
     </span>
   )
