@@ -38,7 +38,6 @@ que-conozco/
     ├── types.ts              # tipos compartidos (City, CountryMeta, MapColors…)
     ├── store.ts              # estado global (zustand + persistencia)
     ├── data/                 # datasets generados
-    │   ├── countryCities.ts  # ids de localidades por país (conteos y marcado, sin detalles)
     │   └── countries.ts      # metadatos de países (código, nombre, continente, bandera)
     ├── lib/
     │   ├── countries.ts      # mapeos país/continente, ids por país y carga lazy de localidades
@@ -81,9 +80,9 @@ que-conozco/
 
 - **world-atlas**: geometría de los países (TopoJSON 110m).
 - **world-countries** (procesado en `src/data/countries.ts`): códigos ISO, nombres (incl. español) y continente.
-- **GeoNames** `cities15000` + `admin1CodesASCII` (procesado en `src/data/countryCities.ts` y `public/data/*.json`): localidades con más de 15 000 habitantes y su provincia/estado.
+- **GeoNames** `cities15000` + `admin1CodesASCII` (procesado en `public/data/country-index.json` y `public/data/*.json`): localidades con más de 15 000 habitantes y su provincia/estado.
 
-Los archivos de `src/data/` y `public/data/` se generan con los scripts `gen.mjs` / `gen-countries.mjs` / `split-cities.mjs`. `gen.mjs` y `gen-countries.mjs` no están versionados (se guardan en `/tmp/opencode` durante el desarrollo); `split-cities.mjs` toma el `cities.ts` intermedio y lo divide en `countryCities.ts` (ids por país) y `public/data/<cca2>.json` (detalles cargados bajo demanda al abrir un país).
+Los archivos de `src/data/` y `public/data/` se generan con los scripts `gen.mjs` / `gen-countries.mjs` / `split-cities.mjs`. `gen.mjs` y `gen-countries.mjs` no están versionados (se guardan en `/tmp/opencode` durante el desarrollo); `split-cities.mjs` toma el `cities.ts` intermedio y lo divide en `public/data/country-index.json` (ids por país, cargados una vez al arrancar) y `public/data/<cca2>.json` (detalles cargados bajo demanda al abrir un país).
 
 ## Desarrollo
 

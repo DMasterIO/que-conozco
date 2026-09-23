@@ -1,3 +1,7 @@
+import { readFileSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
+import { setCountryIndex } from '../lib/countries'
+
 class MemoryStorage {
   private store = new Map<string, string>()
 
@@ -28,3 +32,6 @@ class MemoryStorage {
 
 globalThis.localStorage = new MemoryStorage() as unknown as Storage
 globalThis.window = globalThis as unknown as Window & typeof globalThis
+
+const indexPath = fileURLToPath(new URL('../../public/data/country-index.json', import.meta.url))
+setCountryIndex(JSON.parse(readFileSync(indexPath, 'utf8')))

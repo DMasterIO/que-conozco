@@ -1,5 +1,5 @@
 // Splits the large GeoNames cities dataset into:
-//   - src/data/countryCities.ts   (cca2 -> city ids, for synchronous counts/toggles)
+//   - public/data/country-index.json (cca2 -> city ids, fetched once at startup)
 //   - public/data/<cca2>.json     (full city details, lazy-loaded per country)
 // Run with: node scripts/split-cities.mjs
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
@@ -41,20 +41,18 @@ for (const list of Object.values(byCountry)) {
   list.sort(compareCity)
 }
 
-writeFileSync(
-  resolve(root, 'src/data/countryCities.ts'),
-  '// Auto-generated from GeoNames cities15000. Do not edit manually.\n' +
-    'export const countryCities: Record<string, number[]> = ' +
-    JSON.stringify(countryCities) +
-    '\n',
-)
-
 const outDir = resolve(root, 'public/data')
 mkdirSync(outDir, { recursive: true })
+
+writeFileSync(
+  resolve(outDir, 'country-index.json'),
+  JSON.stringify(countryCities),
+)
+
 for (const [cca2, list] of Object.entries(byCountry)) {
   writeFileSync(resolve(outDir, `${cca2}.json`), JSON.stringify(list))
 }
 
 console.log(`countries: ${Object.keys(countryCities).length}`)
 console.log(`cities: ${cities.length}`)
-console.log(`chunks written to public/data/ (${Object.keys(byCountry).length} files)`)
+console.log(`chunks written to public/data/ (${Object.keys(byCountry).length} files) + country-index.json`)

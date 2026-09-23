@@ -1,6 +1,5 @@
 import type { CountryMeta, City } from '../types'
 import { worldCountries } from '../data/countries'
-import { countryCities } from '../data/countryCities'
 
 export const CONTINENTS: Record<string, string> = {
   'north-america': 'América del Norte',
@@ -87,8 +86,38 @@ export function cityKey(id: number): string {
   return String(id)
 }
 
+let index: Record<string, number[]> = {}
+let indexPromise: Promise<void> | null = null
+
+function baseUrl(): string {
+  return import.meta.env.BASE_URL ?? './'
+}
+
 export function countryCityIds(cca2: string): number[] {
-  return countryCities[cca2] ?? []
+  return index[cca2] ?? []
+}
+
+export function setCountryIndex(data: Record<string, number[]>): void {
+  index = data
+  indexPromise = null
+}
+
+export function loadCountryIndex(): Promise<void> {
+  if (Object.keys(index).length > 0) return Promise.resolve()
+  if (indexPromise) return indexPromise
+  indexPromise = fetch(`${baseUrl()}data/country-index.json`)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Failed to load country index: ${res.status}`)
+      return res.json()
+    })
+    .then((data: Record<string, number[]>) => {
+      index = data
+    })
+    .catch((err) => {
+      indexPromise = null
+      throw err
+    })
+  return indexPromise
 }
 
 const cityDetailsCache = new Map<string, City[]>()
@@ -96,8 +125,7 @@ const cityDetailsCache = new Map<string, City[]>()
 export async function loadCityDetails(cca2: string): Promise<City[]> {
   const cached = cityDetailsCache.get(cca2)
   if (cached) return cached
-  const base = import.meta.env.BASE_URL ?? './'
-  const res = await fetch(`${base}data/${cca2}.json`)
+  const res = await fetch(`${baseUrl()}data/${cca2}.json`)
   if (!res.ok) throw new Error(`Failed to load localities for ${cca2}`)
   const list = (await res.json()) as Omit<City, 'c'>[]
   const full = list.map((d) => ({ ...d, c: cca2 }))
