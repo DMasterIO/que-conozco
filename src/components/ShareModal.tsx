@@ -4,6 +4,7 @@ import { useStore } from '../store'
 import type { MapColors } from '../types'
 import { useI18n } from '../lib/i18n-context'
 import type { Lang } from '../lib/translations'
+import { fmtPct, worldStat } from '../lib/stats'
 
 interface RenderResult {
   visited: Set<string>
@@ -24,11 +25,11 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
     let active = true
     let raf = 0
     raf = requestAnimationFrame(() => {
-      import('../lib/share').then(({ renderStoryCard }) => {
-        if (!active) return
-        const url = renderStoryCard(visited, colors, lang)
-        setResult({ visited, colors, lang, url })
-      })
+      import('../lib/share')
+        .then(({ renderStoryCard }) => renderStoryCard(visited, colors, lang))
+        .then((url) => {
+          if (active) setResult({ visited, colors, lang, url })
+        })
     })
     return () => {
       active = false
@@ -58,7 +59,11 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
     const file = new File([blob], 'que-conozco-historia.png', { type: 'image/png' })
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: 'Mis viajes' })
+        await navigator.share({
+          files: [file],
+          title: t('shareCardTitle'),
+          text: t('shareText', { pct: fmtPct(worldStat(visited).pct) }),
+        })
       } catch {
         /* user cancelled */
       }
@@ -74,7 +79,7 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
         {dataUrl ? (
           <img
             src={dataUrl}
-            alt="Tarjeta para historias"
+            alt={t('shareImageAlt')}
             className="h-[420px] rounded-2xl shadow-lg ring-1 ring-slate-200"
           />
         ) : (
@@ -83,7 +88,7 @@ export default function ShareModal({ onClose }: { onClose: () => void }) {
           </div>
         )}
         {status && <p className="text-center text-xs text-slate-500 dark:text-slate-400">{status}</p>}
-        <p className="text-center text-xs text-slate-400 dark:text-slate-500">{t('shareDescription')}</p>
+        <p className="text-center text-xs text-slate-500 dark:text-slate-400">{t('shareDescription')}</p>
         <div className="flex w-full gap-2">
           <button
             onClick={download}

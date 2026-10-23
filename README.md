@@ -13,7 +13,8 @@ Dominio: [queconozco.com](https://queconozco.com)
 - **Estadísticas**: resumen mundial, desglose por continente y "país más visitado".
 - **Compartir en Instagram**: genera una imagen vertical (1080×1920) con el mapa, las métricas y el país más visitado; descarga el PNG o comparte directo (Web Share API en móvil).
 - **Configuración de colores del mapa**: visitado, no visitado, hover y borde (afecta solo al mapa, persistido).
-- **Persistencia local**: tus marcas y colores se guardan en `localStorage`.
+- **Persistencia local**: tus marcas y colores se guardan en `localStorage`; exporta/importa una copia en JSON (validada) desde el menú.
+- **Selección explícita**: tocar un país abre su panel (marcar país, quiero ir, ciudades); el mapa nunca marca por sí solo. Zoom con rueda/pellizco y puntos para países diminutos.
 
 ## Stack
 
@@ -86,6 +87,14 @@ que-conozco/
 - **GeoNames** `cities15000` + `admin1CodesASCII` + `alternateNamesV2` (generado por `scripts/gen-localities.mjs` en `public/data/`): ciudades agrupadas por región (`admin1`), con nombres en español e inglés (`nEs`/`nEn`, `aEs`/`aEn`). El generador fusiona la aglomeración: un poblado cercano se absorbe en una ciudad claramente dominante (p. ej. Maipú/Ñuñoa → Santiago, arrondissements → París) y solo descarta lugares abandonados, derrumbados o históricos.
 
 `scripts/gen-localities.mjs` produce `public/data/country-index.json` (ids por país, cargados una vez al arrancar), `public/data/<cca2>.json` (detalles con región, cargados bajo demanda al abrir un país) y `public/data/migration.json` (ids antiguos → ciudad actual, para migrar las marcas ya guardadas). El generador descarga los crudos de GeoNames la primera vez (los cachea en `GEONAMES_DIR`, por defecto `/tmp/opencode/geonames`); `src/data/countries.ts` se genera aparte.
+
+## Datos y caché
+
+Los JSON de `public/data` se piden con `?v=<hash del contenido>` (ver `vite.config.ts`), así que regenerar el dataset (`npm run data`) invalida la caché del navegador y del service worker sin tocar nada más. Las marcas guardadas se remapean con `migration.json` una vez por versión de datos (`migratedWith` en el store).
+
+## Pruebas
+
+`npm test` (unitarias, vitest) y `npm run test:e2e` (Playwright; primera vez: `npx playwright install chromium`).
 
 ## Desarrollo
 

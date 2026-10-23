@@ -28,7 +28,7 @@ export default function ColorConfig({ onClose }: { onClose: () => void }) {
     <Modal title={t('mapColors')} onClose={onClose}>
       <p className="mb-5 text-sm text-slate-500 dark:text-slate-400">{t('colorHint')}</p>
       <div className="mb-5">
-        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+        <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           {t('colorPreview')}
         </div>
         <div className="flex h-8 overflow-hidden rounded-lg ring-1 ring-black/10">
@@ -50,7 +50,7 @@ export default function ColorConfig({ onClose }: { onClose: () => void }) {
             />
             <div>
               <div className="text-sm font-medium text-slate-700 dark:text-slate-200">{t(f.labelKey)}</div>
-              <div className="font-mono text-xs text-slate-400 dark:text-slate-500">{local[f.key]}</div>
+              <div className="font-mono text-xs text-slate-500 dark:text-slate-400">{local[f.key]}</div>
             </div>
           </label>
         ))}

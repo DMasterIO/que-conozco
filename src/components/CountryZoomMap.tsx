@@ -63,6 +63,7 @@ export default function CountryZoomMap({ cca2, cities, visited, wishlist, colors
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
+      aria-hidden="true"
       className="w-full rounded-xl bg-slate-50 dark:bg-slate-800"
       onMouseLeave={() => setHovered(null)}
     >

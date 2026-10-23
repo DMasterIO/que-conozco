@@ -11,6 +11,7 @@ html {
 body {
   margin: 0;
   font-family:
+    'Twemoji Country Flags',
     'Inter',
     system-ui,
     -apple-system,
@@ -26,4 +27,9 @@ body {
 
 .country-path:hover {
   fill: var(--map-hover, #0f766e);
+}
+
+/* Dots for tiny countries keep a constant on-screen size while the map is zoomed. */
+.micro-dot {
+  transform: scale(calc(1 / var(--k, 1)));
 }

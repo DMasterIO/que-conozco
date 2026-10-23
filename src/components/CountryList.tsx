@@ -61,7 +61,7 @@ export default function CountryList({ visited, wishlist, colors, onToggle, onTog
 
       {groups.map((group) => (
         <div key={group.key}>
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
             {group.name}
           </h3>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2 xl:grid-cols-3">
@@ -73,7 +73,8 @@ export default function CountryList({ visited, wishlist, colors, onToggle, onTog
                 <button
                   onClick={() => onToggle(meta.cca2)}
                   title={countryName(meta.name, meta.nameEn, lang)}
-                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white transition ${
+                  aria-label={countryName(meta.name, meta.nameEn, lang)}
+                  className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-xs font-bold text-white transition pointer-coarse:h-9 pointer-coarse:w-9 ${
                     stat.status === 'full'
                       ? 'opacity-100'
                       : stat.status === 'partial'
@@ -91,7 +92,7 @@ export default function CountryList({ visited, wishlist, colors, onToggle, onTog
                   <span className="truncate text-sm font-medium text-slate-800 dark:text-slate-100">
                     {meta.flag} {countryName(meta.name, meta.nameEn, lang)}
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                  <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                     <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                       {meta.cca2}
                     </span>
@@ -101,7 +102,8 @@ export default function CountryList({ visited, wishlist, colors, onToggle, onTog
                 <button
                   onClick={() => onToggleWish(meta.cca2)}
                   title={t('wishlist')}
-                  className={`shrink-0 rounded-lg px-2 py-1 text-sm transition ${
+                  aria-label={t('wishlist')}
+                  className={`shrink-0 rounded-lg px-2 py-1 text-sm transition pointer-coarse:min-h-11 pointer-coarse:min-w-11 ${
                     wish > 0
                       ? 'text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950'
                       : 'text-slate-300 hover:bg-slate-100 hover:text-amber-400 dark:text-slate-600 dark:hover:bg-slate-800'
@@ -111,7 +113,7 @@ export default function CountryList({ visited, wishlist, colors, onToggle, onTog
                 </button>
                 <button
                   onClick={() => onOpen(meta.cca2)}
-                  className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium text-teal-600 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950"
+                  className="shrink-0 rounded-lg px-2 py-1 text-xs font-medium pointer-coarse:min-h-11 text-teal-700 hover:bg-teal-50 dark:text-teal-400 dark:hover:bg-teal-950"
                 >
                   {t('cities')}
                 </button>

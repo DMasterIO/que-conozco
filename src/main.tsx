@@ -4,26 +4,24 @@ import { registerSW } from 'virtual:pwa-register'
 import './index.css'
 import App from './App.tsx'
 import { I18nProvider } from './lib/i18n'
-import { loadCountryIndex, loadMigration } from './lib/countries'
-import { useStore } from './store'
+import { bootData, useAppStatus } from './lib/appStatus'
+import { initFlagFont } from './lib/flagFont'
 
-registerSW({ immediate: true })
+initFlagFont()
 
-async function bootstrap() {
-  // Both are best-effort: on failure the app still renders (stats empty / no remap).
-  const [migration] = await Promise.all([
-    loadMigration().catch(() => null),
-    loadCountryIndex().catch(() => null),
-  ])
-  if (migration) useStore.getState().applyMigration(migration)
-}
-
-bootstrap().finally(() => {
-  createRoot(document.getElementById('root')!).render(
-    <StrictMode>
-      <I18nProvider>
-        <App />
-      </I18nProvider>
-    </StrictMode>,
-  )
+const updateSW = registerSW({
+  immediate: true,
+  onNeedRefresh() {
+    useAppStatus.setState({ applyUpdate: () => void updateSW(true) })
+  },
 })
+
+void bootData()
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <I18nProvider>
+      <App />
+    </I18nProvider>
+  </StrictMode>,
+)

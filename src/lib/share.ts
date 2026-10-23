@@ -27,8 +27,13 @@ function card(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h:
   ctx.stroke()
 }
 
-export function renderStoryCard(visited: Set<string>, colors: MapColors, lang: Lang): string {
+const FONT = '"Twemoji Country Flags", system-ui, sans-serif'
+
+export async function renderStoryCard(visited: Set<string>, colors: MapColors, lang: Lang): Promise<string> {
   const m = messages[lang]
+  const mostVisited = mostVisitedCountry(visited)
+  // Make sure the flag font (Windows fallback) is ready before the canvas uses it.
+  if (mostVisited) await document.fonts.load('46px "Twemoji Country Flags"', mostVisited.meta.flag).catch(() => [])
   const canvas = document.createElement('canvas')
   canvas.width = W
   canvas.height = H
@@ -107,12 +112,11 @@ export function renderStoryCard(visited: Set<string>, colors: MapColors, lang: L
   const bannerTop = 1680
   const bannerH = 130
   card(ctx, 120, bannerTop, W - 240, bannerH)
-  const mostVisited = mostVisitedCountry(visited)
   ctx.fillStyle = '#64748b'
   ctx.font = '500 30px system-ui, sans-serif'
   ctx.fillText(m.mostVisitedCountry.toUpperCase(), W / 2, bannerTop + 45)
   ctx.fillStyle = '#ffffff'
-  ctx.font = '800 46px system-ui, sans-serif'
+  ctx.font = `800 46px ${FONT}`
   ctx.fillText(
     mostVisited
       ? `${mostVisited.meta.flag} ${lang === 'en' ? mostVisited.meta.nameEn : mostVisited.meta.name}`

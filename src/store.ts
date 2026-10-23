@@ -16,8 +16,11 @@ interface AppState {
   wishlist: string[]
   colors: MapColors
   theme: Theme
+  // Dataset version the saved ids were last remapped against (see applyMigration).
+  migratedWith: string | null
   selectedCountry: string | null
   canUndo: boolean
+  snapshot: Snapshot | null
   toggleCity: (id: number) => void
   cycleCity: (id: number) => void
   toggleCountry: (cca2: string) => void
@@ -27,17 +30,21 @@ interface AppState {
   setSelectedCountry: (cca2: string | null) => void
   clearAll: () => void
   importData: (data: { visited: string[]; wishlist?: string[]; colors: MapColors }) => void
-  applyMigration: (migration: MigrationMap) => void
+  applyMigration: (migration: MigrationMap, version: string) => void
   undo: () => void
 }
 
-let snapshot: { visited: string[]; wishlist: string[] } | null = null
+interface Snapshot {
+  visited: string[]
+  wishlist: string[]
+}
 
 export const useStore = create<AppState>()(
   persist(
     (set, get) => {
+      // Captures the marks before a change; undo() restores them.
       const remember = () => {
-        snapshot = { visited: get().visited, wishlist: get().wishlist }
+        set({ snapshot: { visited: get().visited, wishlist: get().wishlist } })
       }
 
       return {
@@ -45,8 +52,10 @@ export const useStore = create<AppState>()(
         wishlist: [],
         colors: DEFAULT_COLORS,
         theme: 'system',
+        migratedWith: null,
         selectedCountry: null,
         canUndo: false,
+        snapshot: null,
 
         toggleCity: (id) => {
           remember()
@@ -119,15 +128,15 @@ export const useStore = create<AppState>()(
           set({ visited: [], wishlist: [], canUndo: true })
         },
         importData: (data) => {
-          snapshot = null
+          remember()
           set({
             visited: data.visited,
             wishlist: data.wishlist ?? [],
             colors: data.colors,
-            canUndo: false,
+            canUndo: true,
           })
         },
-        applyMigration: (migration) => {
+        applyMigration: (migration, version) => {
           const remap = (ids: string[]): string[] => {
             const out = new Set<string>()
             for (const key of ids) {
@@ -145,19 +154,28 @@ export const useStore = create<AppState>()(
           const s = get()
           const visited = remap(s.visited)
           const visitedSet = new Set(visited)
-          set({ visited, wishlist: remap(s.wishlist).filter((k) => !visitedSet.has(k)) })
+          set({
+            visited,
+            wishlist: remap(s.wishlist).filter((k) => !visitedSet.has(k)),
+            migratedWith: version,
+          })
         },
         undo: () => {
-          if (!snapshot) return
-          const s = snapshot
-          snapshot = null
-          set({ visited: s.visited, wishlist: s.wishlist, canUndo: false })
+          const s = get().snapshot
+          if (!s) return
+          set({ visited: s.visited, wishlist: s.wishlist, snapshot: null, canUndo: false })
         },
       }
     },
     {
       name: 'que-conozco-v1',
-      partialize: (s) => ({ visited: s.visited, wishlist: s.wishlist, colors: s.colors, theme: s.theme }),
+      partialize: (s) => ({
+        visited: s.visited,
+        wishlist: s.wishlist,
+        colors: s.colors,
+        theme: s.theme,
+        migratedWith: s.migratedWith,
+      }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<AppState>
         return {

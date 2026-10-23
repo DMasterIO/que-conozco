@@ -142,12 +142,12 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
 
         <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-800">
           {loading && (
-            <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+            <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
               {t('loading')}
             </div>
           )}
           {!loading && filtered.length === 0 && (
-            <div className="px-4 py-6 text-center text-sm text-slate-400 dark:text-slate-500">
+            <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
               {t('noResults', { query })}
             </div>
           )}
@@ -159,7 +159,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
                   <span className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     {regionLabel(cities[0], lang) ?? t('noRegion')}
                   </span>
-                  <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
+                  <span className="shrink-0 text-xs text-slate-500 dark:text-slate-400">
                     {regionVisited}/{cities.length}
                   </span>
                 </div>
@@ -171,7 +171,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
                     <button
                       key={c.id}
                       onClick={() => cycleCity(c.id)}
-                      className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                      className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-2.5 text-left pointer-coarse:min-h-12 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
                     >
                       <span
                         className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] font-bold transition ${
@@ -190,8 +190,8 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
                       <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">
                         {cityName(c, lang)}
                       </span>
-                      <span className="w-20 text-right text-xs text-slate-400 dark:text-slate-500">
-                        {c.p.toLocaleString('es')}
+                      <span className="w-20 text-right text-xs text-slate-500 dark:text-slate-400">
+                        {c.p.toLocaleString(lang)}
                       </span>
                     </button>
                   )
@@ -208,7 +208,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl bg-slate-50 p-3 dark:bg-slate-800">
-      <div className="text-xs text-slate-400 dark:text-slate-500">{label}</div>
+      <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
       <div className="text-xl font-bold text-slate-800 dark:text-slate-100">{value}</div>
     </div>
   )

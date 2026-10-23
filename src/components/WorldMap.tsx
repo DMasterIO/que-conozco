@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { geoNaturalEarth1, geoPath } from 'd3-geo'
 import { worldFeatures } from '../lib/geo'
 import { byCca2, byCcn3 } from '../lib/countries'
+import { MICROSTATES } from '../data/microstates'
 import { countryStat, countryWishCount, fmtPct } from '../lib/stats'
 import type { MapColors } from '../types'
 import { useI18n } from '../lib/i18n-context'
@@ -10,15 +11,16 @@ import { countryName } from '../lib/translations'
 
 const W = 1000
 const H = 520
-
-const clampZoom = (k: number) => Math.min(12, Math.max(1, k))
+const MAX_ZOOM = 12
+// Pointer travel (px) under which a press still counts as a click.
+const CLICK_SLOP = 6
 
 interface Props {
   visited: Set<string>
   wishlist: Set<string>
   colors: MapColors
-  onToggle: (cca2: string) => void
-  onOpenCountry: (cca2: string) => void
+  selected: string | null
+  onSelect: (cca2: string | null) => void
 }
 
 interface Zoom {
@@ -38,38 +40,63 @@ interface Fill {
   opacity: number
 }
 
-export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCountry }: Props) {
+// Keeps the map covering the viewport so it can never be dragged out of view.
+function clampZoom(z: Zoom): Zoom {
+  const k = Math.min(MAX_ZOOM, Math.max(1, z.k))
+  return {
+    k,
+    x: Math.min(0, Math.max(W - W * k, z.x)),
+    y: Math.min(0, Math.max(H - H * k, z.y)),
+  }
+}
+
+// Zoom around a viewBox point, keeping that point fixed on screen.
+function zoomAt(z: Zoom, vx: number, vy: number, factor: number): Zoom {
+  const k = Math.min(MAX_ZOOM, Math.max(1, z.k * factor))
+  const px = (vx - z.x) / z.k
+  const py = (vy - z.y) / z.k
+  return clampZoom({ k, x: vx - px * k, y: vy - py * k })
+}
+
+export default function WorldMap({ visited, wishlist, colors, selected, onSelect }: Props) {
   const { t } = useI18n()
   const svgRef = useRef<SVGSVGElement>(null)
-  const drag = useRef<{
+  const groupRef = useRef<SVGGElement>(null)
+  const zoomRef = useRef<Zoom>({ k: 1, x: 0, y: 0 })
+  const pointers = useRef(new Map<number, { x: number; y: number }>())
+  const gesture = useRef<{
     sx: number
     sy: number
     ox: number
     oy: number
     moved: boolean
     cca2: string | null
+    pinch: number
   } | null>(null)
-  const lastClick = useRef<{ time: number; cca2: string } | null>(null)
   const rafRef = useRef<number | null>(null)
   const pointerRef = useRef<{ x: number; y: number; cca2: string | null } | null>(null)
-  const [zoom, setZoom] = useState<Zoom>({ k: 1, x: 0, y: 0 })
   const [tooltip, setTooltip] = useState<TooltipState | null>(null)
+
+  // The pan/zoom transform is written straight to the DOM: React never re-renders the ~250
+  // shapes while a gesture is in progress.
+  function applyZoom(next: Zoom) {
+    zoomRef.current = next
+    groupRef.current?.setAttribute('transform', `translate(${next.x},${next.y}) scale(${next.k})`)
+    svgRef.current?.style.setProperty('--k', String(next.k))
+  }
+
+  function toViewBox(clientX: number, clientY: number) {
+    const rect = svgRef.current!.getBoundingClientRect()
+    return { vx: ((clientX - rect.left) / rect.width) * W, vy: ((clientY - rect.top) / rect.height) * H, rect }
+  }
 
   useEffect(() => {
     const el = svgRef.current
     if (!el) return
     const handler = (e: WheelEvent) => {
       e.preventDefault()
-      const rect = el.getBoundingClientRect()
-      const vx = ((e.clientX - rect.left) / rect.width) * W
-      const vy = ((e.clientY - rect.top) / rect.height) * H
-      const factor = e.deltaY < 0 ? 1.25 : 0.8
-      setZoom((z) => {
-        const k = clampZoom(z.k * factor)
-        const px = (vx - z.x) / z.k
-        const py = (vy - z.y) / z.k
-        return { k, x: vx - px * k, y: vy - py * k }
-      })
+      const { vx, vy } = toViewBox(e.clientX, e.clientY)
+      applyZoom(zoomAt(zoomRef.current, vx, vy, e.deltaY < 0 ? 1.25 : 0.8))
     }
     el.addEventListener('wheel', handler, { passive: false })
     return () => el.removeEventListener('wheel', handler)
@@ -79,13 +106,14 @@ export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCo
     if (rafRef.current != null) cancelAnimationFrame(rafRef.current)
   }, [])
 
-  const path = useMemo(() => {
+  const projection = useMemo(() => {
     const p = geoNaturalEarth1()
     p.fitSize([W, H], { type: 'Sphere' })
-    return geoPath(p)
+    return p
   }, [])
 
   const paths = useMemo(() => {
+    const path = geoPath(projection)
     const out: { d: string; cca2: string }[] = []
     for (const f of worldFeatures) {
       const id = (f as { id?: string }).id
@@ -96,11 +124,22 @@ export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCo
       out.push({ d, cca2: meta.cca2 })
     }
     return out
-  }, [path])
+  }, [projection])
+
+  // Countries too small for the 110m atlas are drawn as dots so they stay reachable.
+  const dots = useMemo(() => {
+    const out: { cx: number; cy: number; cca2: string }[] = []
+    for (const [cca2, [lat, lng]] of Object.entries(MICROSTATES)) {
+      const pt = projection([lng, lat])
+      if (pt && byCca2.has(cca2)) out.push({ cx: pt[0], cy: pt[1], cca2 })
+    }
+    return out
+  }, [projection])
 
   const fillMap = useMemo(() => {
     const map = new Map<string, Fill>()
-    for (const { cca2 } of paths) {
+    const ids = [...paths.map((p) => p.cca2), ...dots.map((d) => d.cca2)]
+    for (const cca2 of ids) {
       const meta = byCca2.get(cca2)
       if (!meta) continue
       const stat = countryStat(meta, visited)
@@ -111,11 +150,13 @@ export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCo
       else map.set(cca2, { fill: colors.notVisited, opacity: 1 })
     }
     return map
-  }, [paths, visited, wishlist, colors])
+  }, [paths, dots, visited, wishlist, colors])
 
-  const mapGroup = useMemo(
+  const selectedPath = useMemo(() => paths.find((p) => p.cca2 === selected)?.d ?? null, [paths, selected])
+
+  const shapes = useMemo(
     () => (
-      <g transform={`translate(${zoom.x},${zoom.y}) scale(${zoom.k})`}>
+      <>
         {paths.map(({ d, cca2 }) => {
           const f = fillMap.get(cca2) ?? { fill: colors.notVisited, opacity: 1 }
           return (
@@ -126,15 +167,37 @@ export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCo
               fill={f.fill}
               fillOpacity={f.opacity}
               stroke={colors.border}
-              strokeWidth={0.5 / zoom.k}
+              strokeWidth={0.6}
+              vectorEffect="non-scaling-stroke"
               className="country-path"
               style={{ cursor: 'pointer' }}
             />
           )
         })}
-      </g>
+        {dots.map(({ cx, cy, cca2 }) => {
+          const f = fillMap.get(cca2) ?? { fill: colors.notVisited, opacity: 1 }
+          return (
+            <g key={cca2} className="micro-dot" style={{ transformOrigin: `${cx}px ${cy}px` }}>
+              <circle cx={cx} cy={cy} r={9} fill="transparent" data-cca2={cca2} />
+              <circle
+                cx={cx}
+                cy={cy}
+                r={3.6}
+                fill={f.fill}
+                fillOpacity={f.opacity}
+                stroke="#64748b"
+                strokeWidth={0.8}
+                vectorEffect="non-scaling-stroke"
+                className="country-path"
+                data-cca2={cca2}
+                style={{ cursor: 'pointer' }}
+              />
+            </g>
+          )
+        })}
+      </>
     ),
-    [paths, fillMap, colors, zoom],
+    [paths, dots, fillMap, colors],
   )
 
   function scheduleTooltip() {
@@ -146,62 +209,98 @@ export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCo
     })
   }
 
+  function countryAt(e: React.PointerEvent): string | null {
+    return (e.target as Element).getAttribute?.('data-cca2') ?? null
+  }
+
+  function startGesture(e: React.PointerEvent, cca2: string | null) {
+    const z = zoomRef.current
+    gesture.current = { sx: e.clientX, sy: e.clientY, ox: z.x, oy: z.y, moved: false, cca2, pinch: 0 }
+  }
+
   function onPointerDown(e: React.PointerEvent) {
-    if (e.button !== 0) return
-    const target = e.target as Element
-    const cca2 = target.getAttribute?.('data-cca2') ?? null
+    if (e.pointerType === 'mouse' && e.button !== 0) return
     svgRef.current?.setPointerCapture(e.pointerId)
-    drag.current = { sx: e.clientX, sy: e.clientY, ox: zoom.x, oy: zoom.y, moved: false, cca2 }
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY })
     pointerRef.current = null
+    setTooltip(null)
+    if (pointers.current.size === 1) {
+      startGesture(e, countryAt(e))
+    } else if (gesture.current) {
+      // Second finger: switch to pinch and never treat this gesture as a click.
+      const [a, b] = Array.from(pointers.current.values())
+      gesture.current.moved = true
+      gesture.current.pinch = Math.hypot(a.x - b.x, a.y - b.y)
+    }
   }
 
   function onPointerMove(e: React.PointerEvent) {
-    if (drag.current) {
-      const dx = e.clientX - drag.current.sx
-      const dy = e.clientY - drag.current.sy
-      if (Math.abs(dx) > 4 || Math.abs(dy) > 4) drag.current.moved = true
-      if (drag.current.moved) {
+    const known = pointers.current.get(e.pointerId)
+    if (known) {
+      known.x = e.clientX
+      known.y = e.clientY
+    }
+    const g = gesture.current
+    if (g && pointers.current.size >= 2 && g.pinch > 0) {
+      const [a, b] = Array.from(pointers.current.values())
+      const dist = Math.hypot(a.x - b.x, a.y - b.y)
+      const { vx, vy } = toViewBox((a.x + b.x) / 2, (a.y + b.y) / 2)
+      applyZoom(zoomAt(zoomRef.current, vx, vy, dist / g.pinch))
+      g.pinch = dist
+      return
+    }
+    if (g) {
+      const dx = e.clientX - g.sx
+      const dy = e.clientY - g.sy
+      if (Math.abs(dx) > CLICK_SLOP || Math.abs(dy) > CLICK_SLOP) g.moved = true
+      if (g.moved) {
         const rect = svgRef.current!.getBoundingClientRect()
-        setZoom({
-          k: zoom.k,
-          x: drag.current.ox + (dx / rect.width) * W,
-          y: drag.current.oy + (dy / rect.height) * H,
-        })
-        setTooltip(null)
+        applyZoom(
+          clampZoom({
+            k: zoomRef.current.k,
+            x: g.ox + (dx / rect.width) * W,
+            y: g.oy + (dy / rect.height) * H,
+          }),
+        )
       }
       return
     }
-    const target = e.target as Element
-    const cca2 = target.getAttribute?.('data-cca2') ?? null
-    pointerRef.current = { x: e.clientX, y: e.clientY, cca2 }
+    if (e.pointerType !== 'mouse') return
+    pointerRef.current = { x: e.clientX, y: e.clientY, cca2: countryAt(e) }
     scheduleTooltip()
   }
 
-  function onPointerUp() {
-    const info = drag.current
-    drag.current = null
-    if (!info || info.moved || !info.cca2) return
-    const cca2 = info.cca2
-    onToggle(cca2)
-    const now = Date.now()
-    const prev = lastClick.current
-    if (prev && prev.cca2 === cca2 && now - prev.time < 400) {
-      lastClick.current = null
-      onOpenCountry(cca2)
-    } else {
-      lastClick.current = { time: now, cca2 }
+  function onPointerUp(e: React.PointerEvent) {
+    pointers.current.delete(e.pointerId)
+    const g = gesture.current
+    if (pointers.current.size > 0) {
+      // One finger left after a pinch: continue panning from where it is.
+      const [rest] = Array.from(pointers.current.values())
+      if (g && rest) {
+        g.sx = rest.x
+        g.sy = rest.y
+        g.ox = zoomRef.current.x
+        g.oy = zoomRef.current.y
+        g.pinch = 0
+      }
+      return
     }
+    gesture.current = null
+    if (!g || g.moved) return
+    onSelect(g.cca2)
+  }
+
+  function onPointerCancel(e: React.PointerEvent) {
+    pointers.current.delete(e.pointerId)
+    if (pointers.current.size === 0) gesture.current = null
   }
 
   function zoomBy(factor: number) {
-    setZoom((z) => {
-      const k = clampZoom(z.k * factor)
-      const cx = W / 2
-      const cy = H / 2
-      const p = { x: (cx - z.x) / z.k, y: (cy - z.y) / z.k }
-      return { k, x: cx - p.x * k, y: cy - p.y * k }
-    })
+    applyZoom(zoomAt(zoomRef.current, W / 2, H / 2, factor))
   }
+
+  const btn =
+    'flex h-8 w-8 items-center justify-center rounded-lg bg-white font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50 pointer-coarse:h-9 pointer-coarse:w-9 dark:bg-slate-900 dark:ring-slate-700 dark:hover:bg-slate-800'
 
   return (
     <div className="relative w-full select-none">
@@ -211,39 +310,41 @@ export default function WorldMap({ visited, wishlist, colors, onToggle, onOpenCo
         role="img"
         aria-label={t('mapAriaLabel')}
         className="block w-full touch-none cursor-grab active:cursor-grabbing"
-        style={{ '--map-hover': colors.hover } as CSSProperties}
+        style={{ '--map-hover': colors.hover, '--k': 1 } as CSSProperties}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
         onPointerLeave={() => {
-          drag.current = null
           pointerRef.current = null
           setTooltip(null)
         }}
       >
-        {mapGroup}
+        <g ref={groupRef}>
+          {shapes}
+          {selectedPath && (
+            <path
+              d={selectedPath}
+              fill="none"
+              className="stroke-slate-900 dark:stroke-white"
+              strokeWidth={2}
+              vectorEffect="non-scaling-stroke"
+              pointerEvents="none"
+            />
+          )}
+        </g>
       </svg>
 
       <div className="absolute left-3 top-3 flex flex-col gap-1">
-        <button
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:ring-slate-700 dark:hover:bg-slate-800"
-          onClick={() => zoomBy(1.25)}
-          title={t('zoomIn')}
-          aria-label={t('zoomIn')}
-        >
+        <button className={`${btn} text-lg`} onClick={() => zoomBy(1.25)} title={t('zoomIn')} aria-label={t('zoomIn')}>
           +
         </button>
-        <button
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-lg font-bold shadow ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:ring-slate-700 dark:hover:bg-slate-800"
-          onClick={() => zoomBy(0.8)}
-          title={t('zoomOut')}
-          aria-label={t('zoomOut')}
-        >
+        <button className={`${btn} text-lg`} onClick={() => zoomBy(0.8)} title={t('zoomOut')} aria-label={t('zoomOut')}>
           −
         </button>
         <button
-          className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-sm shadow ring-1 ring-slate-200 hover:bg-slate-50 dark:bg-slate-900 dark:ring-slate-700 dark:hover:bg-slate-800"
-          onClick={() => setZoom({ k: 1, x: 0, y: 0 })}
+          className={`${btn} text-sm`}
+          onClick={() => applyZoom({ k: 1, x: 0, y: 0 })}
           title={t('restore')}
           aria-label={t('restore')}
         >
@@ -287,7 +388,7 @@ function Tooltip({
   const wishCount = countryWishCount(meta, wishlist)
   return (
     <div
-      className="pointer-events-none fixed z-50 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-xs text-white shadow-lg"
+      className="pointer-events-none fixed z-30 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-xs text-white shadow-lg"
       style={{ left: x, top: y - 64 }}
     >
       <div className="font-semibold">

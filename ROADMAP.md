@@ -49,7 +49,7 @@ Lista de ideas y trabajo futuro de **¿Qué conozco?** (queconozco.com). Sirve c
 - [ ] Globo 3D (globe.gl / three.js) como modo alternativo — esfuerzo `alto`, backend `no`
 - [ ] Búsqueda global de ciudad → saltar al país — esfuerzo `medio`, backend `no`
 - [ ] Importar desde otras apps (Nomad List, Countries Been) — esfuerzo `medio`, backend `no`
-- [ ] Sacar a la vista exportar/importar (hoy oculto tras flag) — esfuerzo `bajo`, backend `no`
+- [x] Sacar a la vista exportar/importar — esfuerzo `bajo`, backend `no`
 
 ### Ingeniería / rendimiento
 - [ ] Virtualización de listas de países — esfuerzo `medio`, backend `no`

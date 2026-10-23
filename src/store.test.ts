@@ -81,14 +81,14 @@ describe('toggleWishCountry', () => {
 describe('applyMigration', () => {
   it('remaps old ids to the retained city and dedupes', () => {
     useStore.setState({ visited: ['100', '200'], wishlist: ['100', '300'] })
-    useStore.getState().applyMigration({ '100': 999, '200': 999, '300': 999 })
+    useStore.getState().applyMigration({ '100': 999, '200': 999, '300': 999 }, 'v1')
     expect(useStore.getState().visited).toEqual(['999'])
     expect(useStore.getState().wishlist).toEqual([])
   })
 
   it('follows chained mappings', () => {
     useStore.setState({ visited: ['1'], wishlist: [] })
-    useStore.getState().applyMigration({ '1': 2, '2': 3 })
+    useStore.getState().applyMigration({ '1': 2, '2': 3 }, 'v1')
     expect(useStore.getState().visited).toEqual(['3'])
   })
 })

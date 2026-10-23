@@ -89,8 +89,22 @@ export function cityKey(id: number): string {
 let index: Record<string, number[]> = {}
 let indexPromise: Promise<void> | null = null
 
+export const DATA_VERSION = __DATA_VERSION__
+
+const FETCH_TIMEOUT_MS = 15000
+
 function baseUrl(): string {
   return import.meta.env.BASE_URL ?? './'
+}
+
+// Dataset files are fetched with the content hash in the URL (see vite.config.ts) and a timeout,
+// so a stalled connection surfaces as an error instead of an endless spinner.
+function fetchData(file: string): Promise<Response> {
+  return fetch(`${baseUrl()}data/${file}?v=${DATA_VERSION}`, { signal: AbortSignal.timeout(FETCH_TIMEOUT_MS) })
+}
+
+export function isCountryIndexLoaded(): boolean {
+  return Object.keys(index).length > 0
 }
 
 export function countryCityIds(cca2: string): number[] {
@@ -103,9 +117,9 @@ export function setCountryIndex(data: Record<string, number[]>): void {
 }
 
 export function loadCountryIndex(): Promise<void> {
-  if (Object.keys(index).length > 0) return Promise.resolve()
+  if (isCountryIndexLoaded()) return Promise.resolve()
   if (indexPromise) return indexPromise
-  indexPromise = fetch(`${baseUrl()}data/country-index.json`)
+  indexPromise = fetchData('country-index.json')
     .then((res) => {
       if (!res.ok) throw new Error(`Failed to load country index: ${res.status}`)
       return res.json()
@@ -129,7 +143,7 @@ let migrationPromise: Promise<MigrationMap> | null = null
 export function loadMigration(): Promise<MigrationMap> {
   if (migration) return Promise.resolve(migration)
   if (migrationPromise) return migrationPromise
-  migrationPromise = fetch(`${baseUrl()}data/migration.json`)
+  migrationPromise = fetchData('migration.json')
     .then((res) => {
       if (!res.ok) throw new Error(`Failed to load migration map: ${res.status}`)
       return res.json()
@@ -155,7 +169,7 @@ const cityDetailsCache = new Map<string, City[]>()
 export async function loadCityDetails(cca2: string): Promise<City[]> {
   const cached = cityDetailsCache.get(cca2)
   if (cached) return cached
-  const res = await fetch(`${baseUrl()}data/${cca2}.json`)
+  const res = await fetchData(`${cca2}.json`)
   if (!res.ok) throw new Error(`Failed to load localities for ${cca2}`)
   const list = (await res.json()) as Omit<City, 'c'>[]
   const full = list.map((d) => ({ ...d, c: cca2 }))

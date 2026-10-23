@@ -86,7 +86,7 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
 function Card({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800">
-      <div className="text-xs text-slate-400 dark:text-slate-500">{label}</div>
+      <div className="text-xs text-slate-500 dark:text-slate-400">{label}</div>
       <div className="mt-1 truncate text-2xl font-bold text-slate-800 dark:text-slate-100">{value}</div>
     </div>
   )

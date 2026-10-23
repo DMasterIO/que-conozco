@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef } from 'react'
 import type { ReactNode } from 'react'
+import { useI18n } from '../lib/i18n-context'
 
 interface Props {
   title: ReactNode
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export default function Modal({ title, onClose, children, maxWidth = 'max-w-2xl' }: Props) {
+  const { t } = useI18n()
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef<HTMLButtonElement>(null)
@@ -80,8 +82,8 @@ export default function Modal({ title, onClose, children, maxWidth = 'max-w-2xl'
           <button
             ref={closeRef}
             onClick={onClose}
-            aria-label="Cerrar"
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+            aria-label={t('close')}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 pointer-coarse:h-11 pointer-coarse:w-11 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
           >
             ✕
           </button>
