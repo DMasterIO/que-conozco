@@ -17,17 +17,16 @@
 //   public/data/migration.json       oldId -> retainedId                   (remaps persisted visits)
 //
 // Run with: node scripts/gen-localities.mjs
-// Network is required on the first run (caches GeoNames under GEONAMES_DIR, default /tmp/opencode/geonames).
+// Network is required on the first run (caches GeoNames under GEONAMES_DIR, default .cache/geonames, which is git-ignored).
 import { execFileSync } from 'node:child_process'
 import { createReadStream, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { tmpdir } from 'node:os'
 import { dirname, resolve } from 'node:path'
 import { createInterface } from 'node:readline'
 import { fileURLToPath } from 'node:url'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const outDir = resolve(root, 'public/data')
-const cacheDir = process.env.GEONAMES_DIR || resolve(tmpdir(), 'opencode/geonames')
+const cacheDir = process.env.GEONAMES_DIR || resolve(root, '.cache/geonames')
 
 const CITIES_URL = 'https://download.geonames.org/export/dump/cities15000.zip'
 const ADMIN1_URL = 'https://download.geonames.org/export/dump/admin1CodesASCII.txt'

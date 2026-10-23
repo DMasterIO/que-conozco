@@ -88,14 +88,15 @@ export const useStore = create<AppState>()(
           remember()
           const visited = new Set(get().visited)
           const keys = ids.map((id) => cityKey(id))
+          const keySet = new Set(keys)
           const allVisited = keys.every((k) => visited.has(k))
           if (allVisited) {
-            set({ visited: get().visited.filter((k) => !keys.includes(k)), canUndo: true })
+            set({ visited: get().visited.filter((k) => !keySet.has(k)), canUndo: true })
           } else {
             const merged = new Set([...get().visited, ...keys])
             set({
               visited: Array.from(merged),
-              wishlist: get().wishlist.filter((k) => !keys.includes(k)),
+              wishlist: get().wishlist.filter((k) => !keySet.has(k)),
               canUndo: true,
             })
           }
@@ -107,14 +108,15 @@ export const useStore = create<AppState>()(
           remember()
           const wishlist = new Set(get().wishlist)
           const keys = ids.map((id) => cityKey(id))
+          const keySet = new Set(keys)
           const allWished = keys.every((k) => wishlist.has(k))
           if (allWished) {
-            set({ wishlist: get().wishlist.filter((k) => !keys.includes(k)), canUndo: true })
+            set({ wishlist: get().wishlist.filter((k) => !keySet.has(k)), canUndo: true })
           } else {
             const merged = new Set([...get().wishlist, ...keys])
             set({
               wishlist: Array.from(merged),
-              visited: get().visited.filter((k) => !keys.includes(k)),
+              visited: get().visited.filter((k) => !keySet.has(k)),
               canUndo: true,
             })
           }

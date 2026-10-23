@@ -31,3 +31,12 @@ describe('COUNTRIES', () => {
     }
   })
 })
+
+describe('Kosovo', () => {
+  it('is listed, has localities and a map feature', async () => {
+    const { featureForCcn3 } = await import('./geo')
+    expect(byCca2.get('XK')?.ccn3).toBe('926')
+    expect(countryCityIds('XK').length).toBeGreaterThan(0)
+    expect(featureForCcn3('926')).toBeDefined()
+  })
+})

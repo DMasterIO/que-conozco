@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
-import { detectLang, messages, STORAGE_KEY, type Lang } from './translations'
+import { detectLang, messages, STORAGE_KEY, type Lang, type MessageKey } from './translations'
 import { I18nContext } from './i18n-context'
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -17,7 +17,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     if (typeof localStorage !== 'undefined') localStorage.setItem(STORAGE_KEY, next)
   }
 
-  const t = (key: string, params?: Record<string, string | number>) => {
+  const t = (key: MessageKey, params?: Record<string, string | number>) => {
     let str = messages[lang][key] ?? messages.es[key] ?? key
     if (params) {
       for (const [k, v] of Object.entries(params)) {

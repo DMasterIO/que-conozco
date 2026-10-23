@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Modal from './Modal'
 import CountryZoomMap from './CountryZoomMap'
 import { byCca2, cityKey, loadCityDetails } from '../lib/countries'
@@ -8,6 +8,10 @@ import { useI18n } from '../lib/i18n-context'
 import { countryName, continentLabel } from '../lib/translations'
 import { cityName, regionLabel } from '../lib/names'
 import type { City } from '../types'
+
+// Rows rendered up front and added each time the list is scrolled to its end. India alone has
+// thousands of localities, so mounting them all at once is what made opening a country slow.
+const PAGE_SIZE = 250
 
 export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose: () => void }) {
   const visitedArr = useStore((s) => s.visited)
@@ -20,6 +24,9 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
   const toggleWishCountry = useStore((s) => s.toggleWishCountry)
   const { t, lang } = useI18n()
   const [query, setQuery] = useState('')
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+  const [shown, setShown] = useState<{ key: string; n: number }>({ key: '', n: PAGE_SIZE })
   const [loaded, setLoaded] = useState<{ cca2: string; cities: City[] } | null>(null)
 
   const meta = byCca2.get(cca2)
@@ -45,7 +52,6 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
     }
   }, [cca2])
 
-  if (!meta || !stat) return null
 
   const loading = loaded === null || loaded.cca2 !== cca2
   const cityList = loading ? [] : loaded.cities
@@ -62,10 +68,16 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
       )
     : cityList
 
+  // A new country or search starts again from the first page.
+  const listKey = `${cca2}|${q}`
+  const limit = shown.key === listKey ? shown.n : PAGE_SIZE
+  const visibleCities = filtered.length > limit ? filtered.slice(0, limit) : filtered
+  const hasMore = visibleCities.length < filtered.length
+
   // `cityList` is pre-sorted by region, so grouping preserves that order.
   const groups: { region: string; cities: City[] }[] = []
   const groupIndex = new Map<string, City[]>()
-  for (const c of filtered) {
+  for (const c of visibleCities) {
     const region = c.a ?? ''
     let list = groupIndex.get(region)
     if (!list) {
@@ -76,13 +88,30 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
     list.push(c)
   }
 
+  useEffect(() => {
+    const el = sentinelRef.current
+    if (!hasMore || !el) return
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setShown((cur) => ({ key: listKey, n: (cur.key === listKey ? cur.n : PAGE_SIZE) + PAGE_SIZE }))
+        }
+      },
+      { root: scrollRef.current, rootMargin: '200px' },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [hasMore, listKey, limit])
+
+  if (!meta || !stat) return null
+
   return (
     <Modal
       title={
         <span className="flex items-center gap-2">
           <span>{meta.flag}</span>
           <span>{countryName(meta.name, meta.nameEn, lang)}</span>
-          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+          <span className="rounded-md bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
             {meta.cca2}
           </span>
         </span>
@@ -126,7 +155,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
             </button>
             <button
               onClick={() => toggleCountry(cca2)}
-              className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700"
+              className="rounded-lg bg-teal-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-800"
             >
               {stat.status === 'full' ? t('unmarkAll') : t('markAllCountry')}
             </button>
@@ -136,11 +165,12 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          aria-label={t('searchLocality', { name: countryName(meta.name, meta.nameEn, lang) })}
           placeholder={t('searchLocality', { name: countryName(meta.name, meta.nameEn, lang) })}
           className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-teal-950"
         />
 
-        <div className="max-h-72 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-800">
+        <div ref={scrollRef} className="max-h-72 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-800">
           {loading && (
             <div className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400">
               {t('loading')}
@@ -154,7 +184,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
           {groups.map(({ region, cities }) => {
             const regionVisited = cities.reduce((n, c) => n + (visited.has(cityKey(c.id)) ? 1 : 0), 0)
             return (
-              <div key={region || '__no_region__'}>
+              <div key={region || '__no_region__'} className="cv-auto">
                 <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/95 px-4 py-1.5 backdrop-blur dark:border-slate-800 dark:bg-slate-800/95">
                   <span className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
                     {regionLabel(cities[0], lang) ?? t('noRegion')}
@@ -199,6 +229,7 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
               </div>
             )
           })}
+          {hasMore && <div ref={sentinelRef} aria-hidden="true" className="h-8" />}
         </div>
       </div>
     </Modal>

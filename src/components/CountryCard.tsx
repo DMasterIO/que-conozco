@@ -48,7 +48,7 @@ export default function CountryCard({ cca2, visited, wishlist, onClose, onOpenCi
       <div className="flex flex-wrap gap-2">
         <button
           onClick={() => toggleCountry(cca2)}
-          className="rounded-lg bg-teal-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-700 pointer-coarse:min-h-11"
+          className="rounded-lg bg-teal-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-teal-800 pointer-coarse:min-h-11"
         >
           {stat.status === 'full' ? t('unmarkAll') : t('markAllCountry')}
         </button>

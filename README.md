@@ -11,7 +11,7 @@ Dominio: [queconozco.com](https://queconozco.com)
 - **Nombres en español e inglés**: ciudades y regiones se muestran traducidas según el idioma (Múnich/Munich, Londres/London, Pekín/Beijing, Nueva York/New York).
 - **Métricas jerárquicas**: el porcentaje se calcula como `localidades visitadas / total` y se desglosa hacia arriba: país → continente → mundo.
 - **Estadísticas**: resumen mundial, desglose por continente y "país más visitado".
-- **Compartir en Instagram**: genera una imagen vertical (1080×1920) con el mapa, las métricas y el país más visitado; descarga el PNG o comparte directo (Web Share API en móvil).
+- **Compartir en Instagram**: genera una imagen vertical (1080×1920) en tres diseños (completa, solo mapa, estadísticas) con mapa, métricas y país más visitado; descarga el PNG o comparte directo (Web Share API en móvil).
 - **Configuración de colores del mapa**: visitado, no visitado, hover y borde (afecta solo al mapa, persistido).
 - **Persistencia local**: tus marcas y colores se guardan en `localStorage`; exporta/importa una copia en JSON (validada) desde el menú.
 - **Selección explícita**: tocar un país abre su panel (marcar país, quiero ir, ciudades); el mapa nunca marca por sí solo. Zoom con rueda/pellizco y puntos para países diminutos.
@@ -86,7 +86,7 @@ que-conozco/
 - **world-countries** (procesado en `src/data/countries.ts`): códigos ISO, nombres (incl. español) y continente.
 - **GeoNames** `cities15000` + `admin1CodesASCII` + `alternateNamesV2` (generado por `scripts/gen-localities.mjs` en `public/data/`): ciudades agrupadas por región (`admin1`), con nombres en español e inglés (`nEs`/`nEn`, `aEs`/`aEn`). El generador fusiona la aglomeración: un poblado cercano se absorbe en una ciudad claramente dominante (p. ej. Maipú/Ñuñoa → Santiago, arrondissements → París) y solo descarta lugares abandonados, derrumbados o históricos.
 
-`scripts/gen-localities.mjs` produce `public/data/country-index.json` (ids por país, cargados una vez al arrancar), `public/data/<cca2>.json` (detalles con región, cargados bajo demanda al abrir un país) y `public/data/migration.json` (ids antiguos → ciudad actual, para migrar las marcas ya guardadas). El generador descarga los crudos de GeoNames la primera vez (los cachea en `GEONAMES_DIR`, por defecto `/tmp/opencode/geonames`); `src/data/countries.ts` se genera aparte.
+`scripts/gen-localities.mjs` produce `public/data/country-index.json` (ids por país, cargados una vez al arrancar), `public/data/<cca2>.json` (detalles con región, cargados bajo demanda al abrir un país) y `public/data/migration.json` (ids antiguos → ciudad actual, para migrar las marcas ya guardadas). El generador descarga los crudos de GeoNames la primera vez (los cachea en `GEONAMES_DIR`, por defecto `.cache/geonames`, ignorado por git); `src/data/countries.ts` se genera aparte.
 
 ## Licencias y privacidad
 

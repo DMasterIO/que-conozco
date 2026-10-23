@@ -52,6 +52,8 @@ export default function CountryZoomMap({ cca2, cities, visited, wishlist, colors
     return { countryPath: path(feature), dots }
   }, [cca2, cities, lang])
 
+  const dotById = useMemo(() => new Map(dots.map((d) => [d.id, d])), [dots])
+
   if (!countryPath) {
     return (
         <div className="flex h-40 items-center justify-center rounded-xl bg-slate-50 text-sm text-slate-400 dark:bg-slate-800 dark:text-slate-500">
@@ -66,6 +68,14 @@ export default function CountryZoomMap({ cca2, cities, visited, wishlist, colors
       aria-hidden="true"
       className="w-full rounded-xl bg-slate-50 dark:bg-slate-800"
       onMouseLeave={() => setHovered(null)}
+      onClick={(e) => {
+        const id = (e.target as Element).getAttribute('data-id')
+        if (id) onToggleCity(Number(id))
+      }}
+      onMouseOver={(e) => {
+        const id = (e.target as Element).getAttribute('data-id')
+        if (id) setHovered(dotById.get(Number(id)) ?? null)
+      }}
     >
       <path d={countryPath} fill={colors.notVisited} stroke={colors.border} strokeWidth={1.5} />
       {dots.map((dot) => {
@@ -80,9 +90,8 @@ export default function CountryZoomMap({ cca2, cities, visited, wishlist, colors
             fill={isVisited ? colors.visited : isWished ? colors.wish : '#ffffff'}
             stroke={isVisited || isWished ? '#ffffff' : colors.visited}
             strokeWidth={1.5}
-            className="cursor-pointer transition-all hover:opacity-80"
-            onClick={() => onToggleCity(dot.id)}
-            onMouseEnter={() => setHovered(dot)}
+            data-id={dot.id}
+            className="cursor-pointer hover:opacity-80"
           />
         )
       })}

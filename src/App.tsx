@@ -10,6 +10,7 @@ import { useI18n } from './lib/i18n-context'
 import { applyTheme } from './lib/theme'
 import { parseBackup, serializeBackup } from './lib/backup'
 import { bootData, useAppStatus } from './lib/appStatus'
+import type { MessageKey } from './lib/translations'
 import type { Theme } from './types'
 
 const StatsPanel = lazy(() => import('./components/StatsPanel'))
@@ -257,7 +258,7 @@ function AppContent() {
           />
         </section>
 
-        <footer className="mt-12 border-t border-slate-200 py-6 text-center text-xs text-slate-400 dark:border-slate-800 dark:text-slate-500">
+        <footer className="mt-12 border-t border-slate-200 py-6 text-center text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
           ¿Qué conozco? · queconozco.com · {t('footerCountries', { n: countriesWithCities })} ·{' '}
           {t('footerNote')} ·{' '}
           <button onClick={() => setModal('about')} className="underline underline-offset-2 hover:text-slate-600 dark:hover:text-slate-300">
@@ -345,7 +346,7 @@ function HeaderButton({
       aria-label={ariaLabel}
       className={`rounded-lg px-3 py-1.5 text-sm font-medium transition pointer-coarse:min-h-11 ${
         danger
-          ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950'
+          ? 'text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950'
           : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
       }`}
     >
@@ -368,7 +369,7 @@ function MenuItem({
       onClick={onClick}
       className={`flex w-full items-center rounded-lg px-3 py-2 text-left text-sm font-medium transition pointer-coarse:min-h-11 ${
         danger
-          ? 'text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950'
+          ? 'text-rose-700 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950'
           : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800'
       }`}
     >
@@ -377,7 +378,7 @@ function MenuItem({
   )
 }
 
-const THEME_OPTIONS: { value: Theme; icon: string; labelKey: string }[] = [
+const THEME_OPTIONS: { value: Theme; icon: string; labelKey: MessageKey }[] = [
   { value: 'light', icon: '☀️', labelKey: 'themeLight' },
   { value: 'dark', icon: '🌙', labelKey: 'themeDark' },
   { value: 'system', icon: '💻', labelKey: 'themeSystem' },

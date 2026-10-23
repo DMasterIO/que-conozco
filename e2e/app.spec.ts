@@ -120,3 +120,13 @@ test('the legal page and license files are served', async ({ page, request }) =>
   expect(await licenses.text()).toContain('react@')
   expect((await request.get('/data/LICENSE.txt')).ok()).toBe(true)
 })
+
+test('long locality lists render in pages and load more on scroll', async ({ page }) => {
+  await page.getByRole('button', { name: /India/ }).last().click()
+  const rows = page.locator('[role=dialog] button.border-b')
+  await expect(rows.first()).toBeVisible()
+  const first = await rows.count()
+  expect(first).toBeLessThan(600)
+  await page.locator('[role=dialog] div.overflow-y-auto').last().evaluate((el) => el.scrollTo(0, el.scrollHeight))
+  await expect.poll(() => rows.count()).toBeGreaterThan(first)
+})

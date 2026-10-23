@@ -3,8 +3,9 @@ import Modal from './Modal'
 import { useStore, DEFAULT_COLORS } from '../store'
 import type { MapColors } from '../types'
 import { useI18n } from '../lib/i18n-context'
+import type { MessageKey } from '../lib/translations'
 
-const FIELDS: { key: keyof MapColors; labelKey: string }[] = [
+const FIELDS: { key: keyof MapColors; labelKey: MessageKey }[] = [
   { key: 'visited', labelKey: 'countriesVisited' },
   { key: 'wish', labelKey: 'wishColor' },
   { key: 'notVisited', labelKey: 'notVisitedCountries' },
@@ -67,7 +68,7 @@ export default function ColorConfig({ onClose }: { onClose: () => void }) {
         </button>
         <button
           onClick={onClose}
-          className="rounded-xl bg-teal-600 px-5 py-2 text-sm font-medium text-white hover:bg-teal-700"
+          className="rounded-xl bg-teal-700 px-5 py-2 text-sm font-medium text-white hover:bg-teal-800"
         >
           {t('done')}
         </button>

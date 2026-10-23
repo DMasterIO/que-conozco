@@ -19,7 +19,7 @@ const CONTINENT_NAMES: Record<string, { es: string; en: string }> = {
   antarctica: { es: 'Antártida', en: 'Antarctica' },
 }
 
-const es: Record<string, string> = {
+const es = {
   appName: '¿Qué conozco?',
   appTagline: 'Mapa de viajes',
   appSubtitle: 'Tu mapa de países y localidades visitados',
@@ -100,6 +100,11 @@ const es: Record<string, string> = {
   updateAvailable: 'Hay una versión nueva disponible',
   update: 'Actualizar',
   about: 'Créditos y privacidad',
+  shareVariant: 'Diseño de la tarjeta',
+  shareVariantFull: 'Completa',
+  shareVariantMap: 'Solo mapa',
+  shareVariantStats: 'Estadísticas',
+  percentExplain: 'Cómo se calcula: cada ciudad cuenta lo mismo. El porcentaje es ciudades visitadas ÷ ciudades del mundo (o del continente / país), así que un país con muchas ciudades pesa más que uno pequeño.',
   legalPage: 'Política de privacidad y licencias completas',
   legalDisclaimer: 'Los límites del mapa son una representación simplificada y no expresan postura sobre disputas territoriales. Datos «tal cual», sin garantía de exactitud.',
   aboutTitle: 'Créditos y privacidad',
@@ -125,9 +130,12 @@ const es: Record<string, string> = {
   onboardingText: 'Toca un país del mapa y elige «Marcar país» o «Ciudades» para marcar lugares concretos.',
   colorPreview: 'Vista previa',
   resetColors: 'Restaurar colores',
-}
+} satisfies Record<string, string>
 
-const en: Record<string, string> = {
+// The key set comes from the Spanish table; `en` must define exactly the same keys.
+export type MessageKey = keyof typeof es
+
+const en: Record<MessageKey, string> = {
   appName: '¿Qué conozco?',
   appTagline: 'Travel map',
   appSubtitle: 'Your map of visited countries and places',
@@ -208,6 +216,11 @@ const en: Record<string, string> = {
   updateAvailable: 'A new version is available',
   update: 'Update',
   about: 'Credits & privacy',
+  shareVariant: 'Card layout',
+  shareVariantFull: 'Full',
+  shareVariantMap: 'Map only',
+  shareVariantStats: 'Stats',
+  percentExplain: 'How it is calculated: every city counts the same. The percentage is visited cities ÷ cities in the world (or continent / country), so a country with many cities weighs more than a small one.',
   legalPage: 'Full privacy policy and licenses',
   legalDisclaimer: 'Map borders are a simplified depiction and express no position on territorial disputes. Data is provided “as is”, with no guarantee of accuracy.',
   aboutTitle: 'Credits & privacy',
@@ -235,7 +248,7 @@ const en: Record<string, string> = {
   resetColors: 'Reset colors',
 }
 
-export const messages: Record<Lang, Record<string, string>> = { es, en }
+export const messages: Record<Lang, Record<MessageKey, string>> = { es, en }
 
 export function continentLabel(key: string, lang: Lang): string {
   const entry = CONTINENT_NAMES[key]

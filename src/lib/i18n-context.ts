@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react'
-import type { Lang } from './translations'
+import type { Lang, MessageKey } from './translations'
 
 export interface I18nValue {
   lang: Lang
   setLang: (lang: Lang) => void
-  t: (key: string, params?: Record<string, string | number>) => string
+  t: (key: MessageKey, params?: Record<string, string | number>) => string
 }
 
 export const I18nContext = createContext<I18nValue | null>(null)

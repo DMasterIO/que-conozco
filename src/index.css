@@ -33,3 +33,9 @@ body {
 .micro-dot {
   transform: scale(calc(1 / var(--k, 1)));
 }
+
+/* Long region lists (India has thousands of rows): skip layout/paint of groups outside the scroll view. */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}

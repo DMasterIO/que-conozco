@@ -26,3 +26,4 @@ dist-ssr
 test-results
 playwright-report
 public/third-party-licenses.txt
+.cache

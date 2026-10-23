@@ -78,6 +78,8 @@ export default function StatsPanel({ onClose }: { onClose: () => void }) {
             )
           })}
         </div>
+
+        <p className="text-xs text-slate-500 dark:text-slate-400">{t('percentExplain')}</p>
       </div>
     </Modal>
   )

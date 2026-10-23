@@ -1,7 +1,8 @@
 import Modal from './Modal'
 import { useI18n } from '../lib/i18n-context'
+import type { MessageKey } from '../lib/translations'
 
-const LINKS: { key: string; href: string }[] = [
+const LINKS: { key: MessageKey; href: string }[] = [
   { key: 'creditsGeonames', href: 'https://www.geonames.org/' },
   { key: 'creditsAtlas', href: 'https://www.naturalearthdata.com/' },
   { key: 'creditsCountries', href: 'https://github.com/mledoze/countries' },

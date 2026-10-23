@@ -40,10 +40,12 @@ export default function CountryList({ visited, wishlist, colors, onToggle, onTog
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          aria-label={t('searchCountry')}
           placeholder={t('searchCountry')}
           className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-teal-950"
         />
         <select
+          aria-label={t('continents')}
           value={continent}
           onChange={(e) => setContinent(e.target.value)}
           className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100 dark:border-slate-700 dark:bg-slate-900 dark:focus:ring-teal-950"
@@ -93,7 +95,7 @@ export default function CountryList({ visited, wishlist, colors, onToggle, onTog
                     {meta.flag} {countryName(meta.name, meta.nameEn, lang)}
                   </span>
                   <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                    <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                    <span className="rounded bg-slate-100 px-1 font-mono text-[10px] text-slate-600 dark:bg-slate-800 dark:text-slate-400">
                       {meta.cca2}
                     </span>
                     {stat.visited}/{stat.total} · {fmtPct(stat.pct)}
