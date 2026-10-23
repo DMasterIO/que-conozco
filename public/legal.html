@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Privacidad y licencias · ¿Qué conozco?</title>
+    <meta name="description" content="Política de privacidad, créditos y licencias de ¿Qué conozco? / Privacy policy, credits and licenses." />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <style>
+      :root { --bg:#f8fafc; --fg:#1e293b; --muted:#475569; --line:#e2e8f0; --link:#0f766e; --card:#fff; }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg:#020617; --fg:#e2e8f0; --muted:#94a3b8; --line:#1e293b; --link:#5eead4; --card:#0f172a; }
+      }
+      body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+      main { max-width:760px; margin:0 auto; padding:24px 16px 64px; }
+      a { color:var(--link); }
+      h1 { font-size:1.6rem; margin:.2em 0; }
+      h2 { font-size:1.25rem; margin:2em 0 .4em; padding-top:.6em; border-top:1px solid var(--line); }
+      h3 { font-size:1rem; margin:1.4em 0 .3em; }
+      table { width:100%; border-collapse:collapse; font-size:.9rem; background:var(--card); }
+      th, td { text-align:left; vertical-align:top; padding:8px 10px; border:1px solid var(--line); }
+      .muted { color:var(--muted); font-size:.9rem; }
+      nav a { margin-right:12px; }
+      code { font-size:.9em; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p><a href="./">← ¿Qué conozco?</a></p>
+      <nav aria-label="Idioma / Language"><a href="#es">Español</a><a href="#en">English</a></nav>
+
+      <!-- ===================== ESPAÑOL ===================== -->
+      <section id="es" lang="es">
+        <h1>Privacidad y licencias</h1>
+        <p class="muted">Última actualización: 23 de octubre de 2026.</p>
+
+        <h2>Política de privacidad</h2>
+        <p>
+          ¿Qué conozco? es una aplicación web sin cuentas ni servidor propio. <strong>No recopilamos, enviamos ni
+          almacenamos tus datos personales</strong>: lo que marcas en el mapa se queda en tu dispositivo.
+        </p>
+
+        <h3>Qué se guarda en tu dispositivo</h3>
+        <table>
+          <tr><th>Dónde</th><th>Qué</th><th>Para qué</th></tr>
+          <tr><td><code>localStorage</code>: <code>que-conozco-v1</code></td><td>Países y ciudades marcados como visitados o deseados, colores del mapa, tema (claro/oscuro/sistema) y versión de datos.</td><td>Que tu mapa siga ahí la próxima vez que abras la app.</td></tr>
+          <tr><td><code>localStorage</code>: <code>que-conozco-lang</code></td><td>Idioma elegido.</td><td>Mostrar la app en tu idioma.</td></tr>
+          <tr><td>Caché del navegador y del service worker</td><td>Archivos de la app y datos de países ya consultados.</td><td>Que cargue más rápido y funcione sin conexión.</td></tr>
+        </table>
+        <p>
+          Esta información es necesaria para que la app funcione y la eligió o generó el propio uso que haces de ella;
+          por eso no usamos aviso de cookies. <strong>No usamos cookies, analítica, publicidad, rastreadores ni
+          servicios de terceros</strong> dentro de la app. Todas las fuentes, mapas y datos se sirven desde el mismo sitio.
+        </p>
+
+        <h3>Hosting</h3>
+        <p>
+          El sitio se publica en GitHub Pages. Como ocurre al visitar cualquier sitio web, el proveedor de hosting puede
+          registrar datos técnicos de la conexión (por ejemplo, tu dirección IP y el navegador) según su propia política:
+          <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">Declaración de privacidad de GitHub</a>.
+          Nosotros no tenemos acceso a esos registros ni los usamos.
+        </p>
+
+        <h3>Compartir y copias de seguridad</h3>
+        <p>
+          La imagen para historias se genera en tu navegador. Solo sale de tu dispositivo si tú la compartes o la
+          descargas. «Exportar» crea un archivo en tu equipo; «Importar» lo lee localmente. Ningún archivo se sube a ningún servidor.
+        </p>
+
+        <h3>Tus derechos y control</h3>
+        <p>
+          Como no tratamos datos personales en servidores, no hay datos que acceder, rectificar o suprimir de nuestra parte. Puedes
+          borrar todo desde el botón «Reiniciar» (marcas) o eliminando los datos del sitio en tu navegador. Si borras los
+          datos del sitio sin una copia exportada, no se pueden recuperar.
+        </p>
+
+        <h3>Menores</h3>
+        <p>La app no pide datos de ningún tipo, por lo que no recopila información de menores.</p>
+
+        <h3>Cambios y contacto</h3>
+        <p>
+          Si en el futuro se añaden cuentas, sincronización o analítica, esta política se actualizará <em>antes</em> de
+          activarlas y se pedirá tu consentimiento cuando corresponda. Dudas o solicitudes:
+          <a href="https://github.com/DMasterIO/que-conozco/issues" rel="noopener">github.com/DMasterIO/que-conozco/issues</a>.
+        </p>
+
+        <h2>Créditos y licencias</h2>
+        <table>
+          <tr><th>Recurso</th><th>Licencia</th><th>Uso en la app</th></tr>
+          <tr><td><a href="https://www.geonames.org/" rel="noopener">GeoNames</a>: ciudades, regiones y nombres alternativos</td><td><a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a></td><td>Base de las localidades. <strong>Modificado</strong>: se filtraron lugares, se fusionaron aglomeraciones y se eligieron nombres en español e inglés. Ver <a href="./data/LICENSE.txt">data/LICENSE.txt</a>.</td></tr>
+          <tr><td><a href="https://www.naturalearthdata.com/" rel="noopener">Natural Earth</a> vía <a href="https://github.com/topojson/world-atlas" rel="noopener">world-atlas</a></td><td>Dominio público (código del paquete: ISC)</td><td>Geometría del mapa (1:110m).</td></tr>
+          <tr><td><a href="https://github.com/mledoze/countries" rel="noopener">world-countries (mledoze/countries)</a></td><td><a href="https://opendatacommons.org/licenses/odbl/1.0/" rel="noopener">ODbL 1.0</a></td><td>Códigos, nombres y ubicaciones de países. Los archivos derivados de la app (<code>countries.ts</code>, <code>microstates.ts</code>) se ofrecen bajo la misma licencia.</td></tr>
+          <tr><td><a href="https://github.com/jdecked/twemoji" rel="noopener">Twemoji</a> © Twitter, Inc. y colaboradores, en la fuente <a href="https://github.com/mozilla/twemoji-colr" rel="noopener">Twemoji Mozilla</a> (Mozilla Foundation) recortada por <a href="https://github.com/talkjs/country-flag-emoji-polyfill" rel="noopener">country-flag-emoji-polyfill</a> (TalkJS)</td><td>Gráficos <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>; fuente Apache 2.0; polyfill MIT</td><td>Banderas en sistemas que no las dibujan (p. ej. Windows). Se recortó la fuente a las banderas.</td></tr>
+          <tr><td>React, Zustand, d3-geo, topojson-client, Tailwind CSS, Workbox y sus dependencias</td><td>MIT / ISC</td><td>Código de la aplicación. Textos completos en <a href="./third-party-licenses.txt">third-party-licenses.txt</a>.</td></tr>
+        </table>
+
+        <h3>Avisos</h3>
+        <ul>
+          <li>Los límites y nombres del mapa son una representación simplificada y no expresan ninguna postura sobre disputas territoriales.</li>
+          <li>Los datos de ciudades y países se ofrecen «tal cual», sin garantía de exactitud ni actualidad.</li>
+          <li>Instagram es una marca de Meta Platforms, Inc.; esta app no está afiliada ni respaldada por Meta. Se menciona solo para indicar el formato de imagen.</li>
+        </ul>
+      </section>
+
+      <!-- ===================== ENGLISH ===================== -->
+      <section id="en" lang="en">
+        <h1>Privacy &amp; licenses</h1>
+        <p class="muted">Last updated: October 23, 2026.</p>
+
+        <h2>Privacy policy</h2>
+        <p>
+          ¿Qué conozco? is a web app with no accounts and no server of its own. <strong>We do not collect, send or store
+          your personal data</strong>: what you mark on the map stays on your device.
+        </p>
+
+        <h3>What is stored on your device</h3>
+        <table>
+          <tr><th>Where</th><th>What</th><th>Why</th></tr>
+          <tr><td><code>localStorage</code>: <code>que-conozco-v1</code></td><td>Countries and cities marked as visited or wished, map colors, theme (light/dark/system) and data version.</td><td>So your map is still there next time.</td></tr>
+          <tr><td><code>localStorage</code>: <code>que-conozco-lang</code></td><td>Chosen language.</td><td>Show the app in your language.</td></tr>
+          <tr><td>Browser and service worker cache</td><td>App files and country data you already loaded.</td><td>Faster loading and offline use.</td></tr>
+        </table>
+        <p>
+          This information is needed for the app to work and comes from your own use of it, so we do not show a cookie
+          banner. <strong>We use no cookies, analytics, advertising, trackers or third-party services</strong> inside the
+          app. All fonts, maps and data are served from the same site.
+        </p>
+
+        <h3>Hosting</h3>
+        <p>
+          The site is published on GitHub Pages. As with any website, the hosting provider may log technical connection
+          data (such as your IP address and browser) under its own policy:
+          <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement" rel="noopener">GitHub General Privacy Statement</a>.
+          We have no access to those logs and do not use them.
+        </p>
+
+        <h3>Sharing and backups</h3>
+        <p>
+          The story image is generated in your browser. It leaves your device only if you share or download it.
+          “Export” creates a file on your computer; “Import” reads it locally. No file is uploaded to any server.
+        </p>
+
+        <h3>Your rights and control</h3>
+        <p>
+          Since we do not process personal data on servers, there is no data for us to access, correct or erase. You can
+          delete everything with the “Reset” button (marks) or by clearing the site data in your browser. If you clear
+          site data without an exported copy, it cannot be recovered.
+        </p>
+
+        <h3>Children</h3>
+        <p>The app asks for no data of any kind, so it does not collect information from children.</p>
+
+        <h3>Changes and contact</h3>
+        <p>
+          If accounts, sync or analytics are added in the future, this policy will be updated <em>before</em> they are
+          enabled and consent will be requested where required. Questions or requests:
+          <a href="https://github.com/DMasterIO/que-conozco/issues" rel="noopener">github.com/DMasterIO/que-conozco/issues</a>.
+        </p>
+
+        <h2>Credits &amp; licenses</h2>
+        <table>
+          <tr><th>Resource</th><th>License</th><th>Use in the app</th></tr>
+          <tr><td><a href="https://www.geonames.org/" rel="noopener">GeoNames</a>: cities, regions and alternate names</td><td><a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a></td><td>Basis of the localities. <strong>Modified</strong>: places were filtered, agglomerations merged and Spanish/English names selected. See <a href="./data/LICENSE.txt">data/LICENSE.txt</a>.</td></tr>
+          <tr><td><a href="https://www.naturalearthdata.com/" rel="noopener">Natural Earth</a> via <a href="https://github.com/topojson/world-atlas" rel="noopener">world-atlas</a></td><td>Public domain (package code: ISC)</td><td>Map geometry (1:110m).</td></tr>
+          <tr><td><a href="https://github.com/mledoze/countries" rel="noopener">world-countries (mledoze/countries)</a></td><td><a href="https://opendatacommons.org/licenses/odbl/1.0/" rel="noopener">ODbL 1.0</a></td><td>Country codes, names and locations. The app's derived files (<code>countries.ts</code>, <code>microstates.ts</code>) are offered under the same license.</td></tr>
+          <tr><td><a href="https://github.com/jdecked/twemoji" rel="noopener">Twemoji</a> © Twitter, Inc. and contributors, in the <a href="https://github.com/mozilla/twemoji-colr" rel="noopener">Twemoji Mozilla</a> font (Mozilla Foundation) subset by <a href="https://github.com/talkjs/country-flag-emoji-polyfill" rel="noopener">country-flag-emoji-polyfill</a> (TalkJS)</td><td>Graphics <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">CC BY 4.0</a>; font Apache 2.0; polyfill MIT</td><td>Flags on systems that do not draw them (e.g. Windows). The font was trimmed to flags.</td></tr>
+          <tr><td>React, Zustand, d3-geo, topojson-client, Tailwind CSS, Workbox and their dependencies</td><td>MIT / ISC</td><td>Application code. Full texts in <a href="./third-party-licenses.txt">third-party-licenses.txt</a>.</td></tr>
+        </table>
+
+        <h3>Notices</h3>
+        <ul>
+          <li>Map borders and names are a simplified depiction and express no position on territorial disputes.</li>
+          <li>City and country data are provided “as is”, with no guarantee of accuracy or timeliness.</li>
+          <li>Instagram is a trademark of Meta Platforms, Inc.; this app is not affiliated with or endorsed by Meta. It is mentioned only to indicate the image format.</li>
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>

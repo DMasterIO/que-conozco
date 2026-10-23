@@ -85,6 +85,8 @@ test('export then import restores marks, and bad files are rejected', async ({ p
 test('credits and privacy are reachable from the footer', async ({ page }) => {
   await page.getByRole('button', { name: 'Créditos y privacidad' }).click()
   await expect(page.getByRole('dialog')).toContainText('GeoNames')
+  await expect(page.getByRole('dialog')).toContainText('CC BY 4.0')
+  await expect(page.getByRole('link', { name: /Política de privacidad/ })).toHaveAttribute('href', /legal\.html#es$/)
   await page.keyboard.press('Escape')
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })
@@ -108,4 +110,13 @@ test('dragging the map pans without selecting a country', async ({ page }) => {
   await page.mouse.move(box.x + box.width * 0.4, box.y + box.height * 0.45, { steps: 5 })
   await page.mouse.up()
   await expect(page.getByRole('region')).toHaveCount(0)
+})
+
+test('the legal page and license files are served', async ({ page, request }) => {
+  await page.goto('/legal.html')
+  await expect(page.getByRole('heading', { name: 'Política de privacidad' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Privacy policy' })).toBeVisible()
+  const licenses = await request.get('/third-party-licenses.txt')
+  expect(await licenses.text()).toContain('react@')
+  expect((await request.get('/data/LICENSE.txt')).ok()).toBe(true)
 })

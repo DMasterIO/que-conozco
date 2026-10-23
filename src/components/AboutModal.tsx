@@ -3,13 +3,13 @@ import { useI18n } from '../lib/i18n-context'
 
 const LINKS: { key: string; href: string }[] = [
   { key: 'creditsGeonames', href: 'https://www.geonames.org/' },
-  { key: 'creditsAtlas', href: 'https://github.com/topojson/world-atlas' },
+  { key: 'creditsAtlas', href: 'https://www.naturalearthdata.com/' },
   { key: 'creditsCountries', href: 'https://github.com/mledoze/countries' },
-  { key: 'creditsFlags', href: 'https://github.com/twitter/twemoji' },
+  { key: 'creditsFlags', href: 'https://github.com/jdecked/twemoji' },
 ]
 
 export default function AboutModal({ onClose }: { onClose: () => void }) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   return (
     <Modal title={t('aboutTitle')} onClose={onClose} maxWidth="max-w-lg">
       <div className="flex flex-col gap-5 text-sm text-slate-600 dark:text-slate-300">
@@ -34,6 +34,15 @@ export default function AboutModal({ onClose }: { onClose: () => void }) {
             ))}
           </ul>
         </section>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{t('legalDisclaimer')}</p>
+        <a
+          href={`${import.meta.env.BASE_URL}legal.html#${lang}`}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="font-medium text-teal-700 underline underline-offset-2 dark:text-teal-300"
+        >
+          {t('legalPage')} ↗
+        </a>
       </div>
     </Modal>
   )

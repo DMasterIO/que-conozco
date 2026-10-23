@@ -88,6 +88,13 @@ que-conozco/
 
 `scripts/gen-localities.mjs` produce `public/data/country-index.json` (ids por país, cargados una vez al arrancar), `public/data/<cca2>.json` (detalles con región, cargados bajo demanda al abrir un país) y `public/data/migration.json` (ids antiguos → ciudad actual, para migrar las marcas ya guardadas). El generador descarga los crudos de GeoNames la primera vez (los cachea en `GEONAMES_DIR`, por defecto `/tmp/opencode/geonames`); `src/data/countries.ts` se genera aparte.
 
+## Licencias y privacidad
+
+- Créditos y política de privacidad (ES/EN): `public/legal.html`, enlazada desde el modal «Créditos y privacidad». Si cambia lo que la app guarda o envía (analítica, cuentas, hosting), actualízala **antes** de publicar el cambio.
+- Datos de ciudades (GeoNames, CC BY 4.0, modificados): `public/data/LICENSE.txt`.
+- `src/data/countries.ts` y `src/data/microstates.ts` derivan de world-countries y se ofrecen bajo ODbL 1.0.
+- `public/third-party-licenses.txt` se genera en cada build (`scripts/gen-licenses.mjs`).
+
 ## Datos y caché
 
 Los JSON de `public/data` se piden con `?v=<hash del contenido>` (ver `vite.config.ts`), así que regenerar el dataset (`npm run data`) invalida la caché del navegador y del service worker sin tocar nada más. Las marcas guardadas se remapean con `migration.json` una vez por versión de datos (`migratedWith` en el store).

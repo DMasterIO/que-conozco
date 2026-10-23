@@ -62,6 +62,8 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
         globIgnores: ['**/og-image.png'],
+        // Static pages that are not the SPA shell must not be answered with index.html.
+        navigateFallbackDenylist: [/legal\.html$/, /third-party-licenses\.txt$/],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         runtimeCaching: [

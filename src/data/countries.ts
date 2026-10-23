@@ -1,4 +1,7 @@
-// Auto-generated slim country metadata (from world-countries).
+// Auto-generated slim country metadata, derived from world-countries (mledoze/countries).
+// This file is a Derived Database under the ODC Open Database License (ODbL) 1.0 and is made
+// available under the same license: https://opendatacommons.org/licenses/odbl/1.0/
+// Source: https://github.com/mledoze/countries (Copyright the contributors).
 export interface SlimCountry {
   cca2: string
   cca3: string

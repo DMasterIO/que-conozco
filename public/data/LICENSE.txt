@@ -1,0 +1,11 @@
+Locality data (country-index.json, migration.json and the per-country <cca2>.json files)
+
+Derived from GeoNames (https://www.geonames.org/): cities15000, admin1CodesASCII and
+alternateNamesV2, licensed under Creative Commons Attribution 4.0 (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+
+Changes made: places were filtered (abandoned/historical entries removed), nearby places were
+merged into the dominant city of their agglomeration, ids were remapped, and Spanish/English
+names were selected from GeoNames' alternate names. The generator is scripts/gen-localities.mjs.
+
+GeoNames data is provided "as is", without warranty of accuracy, timeliness or completeness.
