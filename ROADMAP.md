@@ -43,6 +43,7 @@ Lista de ideas y trabajo futuro de **¿Qué conozco?** (queconozco.com). Sirve c
 - [ ] Comparar con amigos / leaderboard — esfuerzo `alto`, backend `sí`
 
 ### UX / producto
+- [x] Locaciones a 3 niveles (país → región → ciudad) con fusión de aglomeración y migración de marcas — esfuerzo `alto`, backend `no`
 - [ ] Diario / notas por lugar (rating, recuerdos) — esfuerzo `medio`, backend `no`
 - [ ] Detalle de país enriquecido (capital, idioma, moneda, Wikipedia) — esfuerzo `medio`, backend `no`
 - [ ] Globo 3D (globe.gl / three.js) como modo alternativo — esfuerzo `alto`, backend `no`

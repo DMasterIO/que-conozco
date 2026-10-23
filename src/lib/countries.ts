@@ -120,6 +120,36 @@ export function loadCountryIndex(): Promise<void> {
   return indexPromise
 }
 
+export type MigrationMap = Record<string, number>
+
+let migration: MigrationMap | null = null
+let migrationPromise: Promise<MigrationMap> | null = null
+
+// Remaps ids from the old, over-granular dataset to the current city ids.
+export function loadMigration(): Promise<MigrationMap> {
+  if (migration) return Promise.resolve(migration)
+  if (migrationPromise) return migrationPromise
+  migrationPromise = fetch(`${baseUrl()}data/migration.json`)
+    .then((res) => {
+      if (!res.ok) throw new Error(`Failed to load migration map: ${res.status}`)
+      return res.json()
+    })
+    .then((data: MigrationMap) => {
+      migration = data
+      return data
+    })
+    .catch((err) => {
+      migrationPromise = null
+      throw err
+    })
+  return migrationPromise
+}
+
+export function setMigration(data: MigrationMap): void {
+  migration = data
+  migrationPromise = null
+}
+
 const cityDetailsCache = new Map<string, City[]>()
 
 export async function loadCityDetails(cca2: string): Promise<City[]> {

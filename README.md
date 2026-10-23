@@ -7,7 +7,8 @@ Dominio: [queconozco.com](https://queconozco.com)
 ## Características
 
 - **Mapa del mundo interactivo** en SVG (sin API key): clic para marcar/desmarcar un país, doble clic para ver sus localidades, zoom con rueda/botones y arrastre para desplazarse.
-- **Marcado por localidades**: cada país tiene sus principales localidades (pueblos y ciudades). Puedes marcar el país completo o localidad por localidad.
+- **Jerarquía de 3 niveles**: país → región → ciudad. En el detalle, las ciudades se agrupan por región (encabezados) y el nivel hoja es siempre una ciudad: nunca se baja a comuna, barrio o distrito. Puedes marcar el país completo o ciudad por ciudad.
+- **Nombres en español e inglés**: ciudades y regiones se muestran traducidas según el idioma (Múnich/Munich, Londres/London, Pekín/Beijing, Nueva York/New York).
 - **Métricas jerárquicas**: el porcentaje se calcula como `localidades visitadas / total` y se desglosa hacia arriba: país → continente → mundo.
 - **Estadísticas**: resumen mundial, desglose por continente y "país más visitado".
 - **Compartir en Instagram**: genera una imagen vertical (1080×1920) con el mapa, las métricas y el país más visitado; descarga el PNG o comparte directo (Web Share API en móvil).
@@ -31,6 +32,8 @@ que-conozco/
 ├── package.json
 ├── public/
 │   └── favicon.svg
+├── scripts/
+│   └── gen-localities.mjs   # genera el dataset de ciudades a 3 niveles (GeoNames)
 └── src/
     ├── main.tsx              # punto de entrada
     ├── App.tsx               # layout, header, modales y navegación
@@ -80,9 +83,9 @@ que-conozco/
 
 - **world-atlas**: geometría de los países (TopoJSON 110m).
 - **world-countries** (procesado en `src/data/countries.ts`): códigos ISO, nombres (incl. español) y continente.
-- **GeoNames** `cities15000` + `admin1CodesASCII` (procesado en `public/data/country-index.json` y `public/data/*.json`): localidades con más de 15 000 habitantes y su provincia/estado.
+- **GeoNames** `cities15000` + `admin1CodesASCII` + `alternateNamesV2` (generado por `scripts/gen-localities.mjs` en `public/data/`): ciudades agrupadas por región (`admin1`), con nombres en español e inglés (`nEs`/`nEn`, `aEs`/`aEn`). El generador fusiona la aglomeración: un poblado cercano se absorbe en una ciudad claramente dominante (p. ej. Maipú/Ñuñoa → Santiago, arrondissements → París) y solo descarta lugares abandonados, derrumbados o históricos.
 
-Los archivos de `src/data/` y `public/data/` se generan con los scripts `gen.mjs` / `gen-countries.mjs` / `split-cities.mjs`. `gen.mjs` y `gen-countries.mjs` no están versionados (se guardan en `/tmp/opencode` durante el desarrollo); `split-cities.mjs` toma el `cities.ts` intermedio y lo divide en `public/data/country-index.json` (ids por país, cargados una vez al arrancar) y `public/data/<cca2>.json` (detalles cargados bajo demanda al abrir un país).
+`scripts/gen-localities.mjs` produce `public/data/country-index.json` (ids por país, cargados una vez al arrancar), `public/data/<cca2>.json` (detalles con región, cargados bajo demanda al abrir un país) y `public/data/migration.json` (ids antiguos → ciudad actual, para migrar las marcas ya guardadas). El generador descarga los crudos de GeoNames la primera vez (los cachea en `GEONAMES_DIR`, por defecto `/tmp/opencode/geonames`); `src/data/countries.ts` se genera aparte.
 
 ## Desarrollo
 

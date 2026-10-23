@@ -4,6 +4,7 @@ import { featureForCcn3 } from '../lib/geo'
 import { byCca2 } from '../lib/countries'
 import type { MapColors, City } from '../types'
 import { useI18n } from '../lib/i18n-context'
+import { cityName, regionLabel } from '../lib/names'
 
 const W = 600
 const H = 400
@@ -26,7 +27,7 @@ interface Props {
 }
 
 export default function CountryZoomMap({ cca2, cities, visited, wishlist, colors, onToggleCity }: Props) {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const [hovered, setHovered] = useState<Dot | null>(null)
 
   const { countryPath, dots } = useMemo(() => {
@@ -46,10 +47,10 @@ export default function CountryZoomMap({ cca2, cities, visited, wishlist, colors
     const dots: Dot[] = []
     for (const c of cities) {
       const pt = p([c.lng, c.lat])
-      if (pt) dots.push({ id: c.id, name: c.n, admin: c.a, x: pt[0], y: pt[1] })
+      if (pt) dots.push({ id: c.id, name: cityName(c, lang), admin: regionLabel(c, lang), x: pt[0], y: pt[1] })
     }
     return { countryPath: path(feature), dots }
-  }, [cca2, cities])
+  }, [cca2, cities, lang])
 
   if (!countryPath) {
     return (

@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { MapColors, Theme } from './types'
-import { countryCityIds, cityKey } from './lib/countries'
+import { countryCityIds, cityKey, type MigrationMap } from './lib/countries'
 
 export const DEFAULT_COLORS: MapColors = {
   visited: '#14b8a6',
@@ -27,6 +27,7 @@ interface AppState {
   setSelectedCountry: (cca2: string | null) => void
   clearAll: () => void
   importData: (data: { visited: string[]; wishlist?: string[]; colors: MapColors }) => void
+  applyMigration: (migration: MigrationMap) => void
   undo: () => void
 }
 
@@ -125,6 +126,26 @@ export const useStore = create<AppState>()(
             colors: data.colors,
             canUndo: false,
           })
+        },
+        applyMigration: (migration) => {
+          const remap = (ids: string[]): string[] => {
+            const out = new Set<string>()
+            for (const key of ids) {
+              let id = key
+              let next = migration[id]
+              let hops = 0
+              while (next !== undefined && String(next) !== id && hops++ < 8) {
+                id = String(next)
+                next = migration[id]
+              }
+              out.add(id)
+            }
+            return Array.from(out)
+          }
+          const s = get()
+          const visited = remap(s.visited)
+          const visitedSet = new Set(visited)
+          set({ visited, wishlist: remap(s.wishlist).filter((k) => !visitedSet.has(k)) })
         },
         undo: () => {
           if (!snapshot) return

@@ -6,6 +6,11 @@ export interface City {
   lng: number
   p: number
   a?: string
+  // Localized names (only present when they differ from the base `n` / `a`).
+  nEs?: string
+  nEn?: string
+  aEs?: string
+  aEn?: string
 }
 
 export interface CountryMeta {

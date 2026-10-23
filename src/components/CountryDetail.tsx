@@ -6,6 +6,7 @@ import { countryStat, countryWishCount, continentStats, fmtPct, worldStat } from
 import { useStore } from '../store'
 import { useI18n } from '../lib/i18n-context'
 import { countryName, continentLabel } from '../lib/translations'
+import { cityName, regionLabel } from '../lib/names'
 import type { City } from '../types'
 
 export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose: () => void }) {
@@ -50,8 +51,30 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
   const cityList = loading ? [] : loaded.cities
   const q = normalize(query.trim())
   const filtered = q
-    ? cityList.filter((c) => normalize(c.n).includes(q) || normalize(c.a ?? '').includes(q))
+    ? cityList.filter(
+        (c) =>
+          normalize(c.n).includes(q) ||
+          normalize(c.nEs ?? '').includes(q) ||
+          normalize(c.nEn ?? '').includes(q) ||
+          normalize(c.a ?? '').includes(q) ||
+          normalize(c.aEs ?? '').includes(q) ||
+          normalize(c.aEn ?? '').includes(q),
+      )
     : cityList
+
+  // `cityList` is pre-sorted by region, so grouping preserves that order.
+  const groups: { region: string; cities: City[] }[] = []
+  const groupIndex = new Map<string, City[]>()
+  for (const c of filtered) {
+    const region = c.a ?? ''
+    let list = groupIndex.get(region)
+    if (!list) {
+      list = []
+      groupIndex.set(region, list)
+      groups.push({ region, cities: list })
+    }
+    list.push(c)
+  }
 
   return (
     <Modal
@@ -128,36 +151,52 @@ export default function CountryDetail({ cca2, onClose }: { cca2: string; onClose
               {t('noResults', { query })}
             </div>
           )}
-          {filtered.map((c) => {
-            const key = cityKey(c.id)
-            const isVisited = visited.has(key)
-            const isWished = wishlist.has(key)
+          {groups.map(({ region, cities }) => {
+            const regionVisited = cities.reduce((n, c) => n + (visited.has(cityKey(c.id)) ? 1 : 0), 0)
             return (
-              <button
-                key={c.id}
-                onClick={() => cycleCity(c.id)}
-                className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
-              >
-                <span
-                  className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] font-bold transition ${
-                    isVisited || isWished ? '' : 'border-slate-300 dark:border-slate-600'
-                  }`}
-                  style={{
-                    background: isVisited
-                      ? colors.visited
-                      : isWished
-                        ? colors.wish
-                        : 'transparent',
-                  }}
-                >
-                  {isVisited ? '✓' : isWished ? '★' : ''}
-                </span>
-                <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{c.n}</span>
-                {c.a && <span className="text-xs text-slate-400 dark:text-slate-500">{c.a}</span>}
-                <span className="w-20 text-right text-xs text-slate-400 dark:text-slate-500">
-                  {c.p.toLocaleString('es')}
-                </span>
-              </button>
+              <div key={region || '__no_region__'}>
+                <div className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-slate-100 bg-slate-50/95 px-4 py-1.5 backdrop-blur dark:border-slate-800 dark:bg-slate-800/95">
+                  <span className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    {regionLabel(cities[0], lang) ?? t('noRegion')}
+                  </span>
+                  <span className="shrink-0 text-xs text-slate-400 dark:text-slate-500">
+                    {regionVisited}/{cities.length}
+                  </span>
+                </div>
+                {cities.map((c) => {
+                  const key = cityKey(c.id)
+                  const isVisited = visited.has(key)
+                  const isWished = wishlist.has(key)
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => cycleCity(c.id)}
+                      className="flex w-full items-center gap-3 border-b border-slate-50 px-4 py-2.5 text-left hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                    >
+                      <span
+                        className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border text-[10px] font-bold transition ${
+                          isVisited || isWished ? '' : 'border-slate-300 dark:border-slate-600'
+                        }`}
+                        style={{
+                          background: isVisited
+                            ? colors.visited
+                            : isWished
+                              ? colors.wish
+                              : 'transparent',
+                        }}
+                      >
+                        {isVisited ? '✓' : isWished ? '★' : ''}
+                      </span>
+                      <span className="flex-1 truncate text-sm text-slate-700 dark:text-slate-200">
+                        {cityName(c, lang)}
+                      </span>
+                      <span className="w-20 text-right text-xs text-slate-400 dark:text-slate-500">
+                        {c.p.toLocaleString('es')}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
             )
           })}
         </div>

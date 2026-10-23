@@ -51,7 +51,9 @@ export default defineConfig({
             urlPattern: /\/data\/.*\.json$/,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'country-data',
+              // Bump when the shape of the generated data changes, otherwise returning
+              // users keep serving the previous dataset from this cache.
+              cacheName: 'country-data-v2',
               expiration: {
                 maxEntries: 300,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
