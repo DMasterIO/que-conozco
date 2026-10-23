@@ -44,7 +44,6 @@ function AppContent() {
   const undo = useStore((s) => s.undo)
   const { t, lang, setLang } = useI18n()
   const dataStatus = useAppStatus((s) => s.data)
-  const applyUpdate = useAppStatus((s) => s.applyUpdate)
 
   const [picked, setPicked] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
@@ -301,14 +300,6 @@ function AppContent() {
       )}
 
       <div className="fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-4">
-        {applyUpdate && (
-          <div role="status" className="flex items-center gap-3 rounded-full bg-teal-700 px-4 py-2 text-sm text-white shadow-lg">
-            {t('updateAvailable')}
-            <button onClick={applyUpdate} className="rounded-full bg-white/20 px-3 py-0.5 font-medium hover:bg-white/30">
-              {t('update')}
-            </button>
-          </div>
-        )}
         {notice && (
           <div role="status" className="rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg ring-1 ring-slate-700">
             {notice}

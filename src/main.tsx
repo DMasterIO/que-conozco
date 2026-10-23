@@ -4,17 +4,14 @@ import { registerSW } from 'virtual:pwa-register'
 import './index.css'
 import App from './App.tsx'
 import { I18nProvider } from './lib/i18n'
-import { bootData, useAppStatus } from './lib/appStatus'
+import { bootData } from './lib/appStatus'
 import { initFlagFont } from './lib/flagFont'
 
 initFlagFont()
 
-const updateSW = registerSW({
-  immediate: true,
-  onNeedRefresh() {
-    useAppStatus.setState({ applyUpdate: () => void updateSW(true) })
-  },
-})
+// autoUpdate: a new service worker activates immediately and the page reloads into it. (A
+// "prompt" worker waits for every old tab to close, which left returning visitors on a stale build.)
+registerSW({ immediate: true })
 
 void bootData()
 

@@ -6,11 +6,9 @@ type DataStatus = 'loading' | 'ready' | 'error'
 
 interface AppStatus {
   data: DataStatus
-  // Set when a new service worker is waiting; calling it reloads into the new version.
-  applyUpdate: (() => void) | null
 }
 
-export const useAppStatus = create<AppStatus>(() => ({ data: 'loading', applyUpdate: null }))
+export const useAppStatus = create<AppStatus>(() => ({ data: 'loading' }))
 
 // Loads the country index (required) and, if the saved marks predate the current dataset,
 // the id migration map. The UI renders right away and reacts to `data`.
